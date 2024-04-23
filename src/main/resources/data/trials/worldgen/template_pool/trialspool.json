@@ -1,0 +1,42 @@
+{
+  "name": "trials:trialspool",
+  "fallback": "minecraft:empty",
+  "elements": [
+    {
+      "weight": 10,
+      "element": {
+        "location": "trials:trials_tower_01",
+        "processors": "trials:add_vaults",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    },
+    {
+      "weight": 10,
+      "element": {
+        "location": "trials:trials_tower_02",
+        "processors": "trials:add_vaults",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    },
+    {
+      "weight": 10,
+      "element": {
+        "location": "trials:trials_tower_03",
+        "processors": "trials:add_vaults",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    },
+    {
+      "weight": 10,
+      "element": {
+        "location": "trials:trials_tower_04",
+        "processors": "trials:add_vaults",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    }
+  ]
+}

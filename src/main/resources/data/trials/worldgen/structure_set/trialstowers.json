@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "trials:trialstowers",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 21,
+    "separation": 12,
+    "salt": 419788921
+  }
+}
