@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "trials_active=true,trials_ejecting=true": {
+      "model": "trials:block/trial_spawner_ejecting"
+    },
+    "trials_active=true,trials_ejecting=false": {
+      "model": "trials:block/trial_spawner_active"
+    },
+    "trials_active=false,trials_ejecting=false": {
+      "model": "trials:block/trial_spawner_inactive"
+    }
+  }
+}

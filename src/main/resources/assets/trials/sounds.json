@@ -1,0 +1,200 @@
+{
+  "vault_open": {
+    "subtitle": "subtitles.vault_open",
+    "sounds": [
+      {
+        "name": "trials:vault_open",
+        "stream": false
+      }
+    ]
+  },
+  "vault_key": {
+    "subtitle": "subtitles.vault_key",
+    "sounds": [
+      {
+        "name": "trials:vault_insert_key",
+        "stream": false
+      }
+    ]
+  },
+  "vault_eject": {
+    "subtitle": "subtitles.vault_eject",
+    "sounds": [
+      {
+        "name": "trials:vault_eject_item_1",
+        "stream": false
+      },
+      {
+        "name": "trials:vault_eject_item_2",
+        "stream": false
+      },
+      {
+        "name": "trials:vault_eject_item_3",
+        "stream": false
+      }
+    ]
+  },
+  "vault_activate": {
+    "subtitle": "subtitles.vault_activate",
+    "sounds": [
+      {
+        "name": "trials:vault_activate",
+        "stream": false
+      }
+    ]
+  },
+  "spawner_close": {
+    "subtitle": "subtitles.spawner_close",
+    "sounds": [
+      {
+        "name": "trials:spawner_close",
+        "stream": false
+      }
+    ]
+  },
+  "spawner_detect": {
+    "subtitle": "subtitles.spawner_detect",
+    "sounds": [
+      {
+        "name": "trials:spawner_detect_player_1",
+        "stream": false
+      },
+      {
+        "name": "trials:spawner_detect_player_2",
+        "stream": false
+      },
+      {
+        "name": "trials:spawner_detect_player_3",
+        "stream": false
+      }
+    ]
+  },
+  "spawner_open": {
+    "subtitle": "subtitles.spawner_open",
+    "sounds": [
+      {
+        "name": "trials:spawner_open",
+        "stream": false
+      }
+    ]
+  },
+  "spawner_item": {
+    "subtitle": "subtitles.spawner_item",
+    "sounds": [
+      {
+        "name": "trials:spawner_item_1",
+        "stream": false
+      },
+      {
+        "name": "trials:spawner_item_2",
+        "stream": false
+      },
+      {
+        "name": "trials:spawner_item_3",
+        "stream": false
+      }
+    ]
+  },
+  "spawner_summon": {
+    "subtitle": "subtitles.spawner_summon",
+    "sounds": [
+      {
+        "name": "trials:spawner_summon_1",
+        "stream": false
+      },
+      {
+        "name": "trials:spawner_summon_2",
+        "stream": false
+      },
+      {
+        "name": "trials:spawner_summon_3",
+        "stream": false
+      },
+      {
+        "name": "trials:spawner_summon_4",
+        "stream": false
+      }
+    ]
+  },
+  "bogged_ambient": {
+    "subtitle": "subtitles.bogged_ambient",
+    "sounds": [
+      {
+        "name": "trials:bogged_ambient_1",
+        "stream": false
+      },
+      {
+        "name": "trials:bogged_ambient_2",
+        "stream": false
+      },
+      {
+        "name": "trials:bogged_ambient_3",
+        "stream": false
+      },
+      {
+        "name": "trials:bogged_ambient_4",
+        "stream": false
+      }
+    ]
+  },
+  "bogged_death": {
+    "subtitle": "subtitles.bogged_death",
+    "sounds": [
+      {
+        "name": "trials:bogged_death",
+        "stream": false
+      }
+    ]
+  },
+  "bogged_hurt": {
+    "subtitle": "subtitles.bogged_hurt",
+    "sounds": [
+      {
+        "name": "trials:bogged_hurt_1",
+        "stream": false
+      },
+      {
+        "name": "trials:bogged_hurt_2",
+        "stream": false
+      },
+      {
+        "name": "trials:bogged_hurt_3",
+        "stream": false
+      },
+      {
+        "name": "trials:bogged_hurt_4",
+        "stream": false
+      }
+    ]
+  },
+  "bogged_step": {
+    "subtitle": "subtitles.bogged_step",
+    "sounds": [
+      {
+        "name": "trials:bogged_step_1",
+        "stream": false
+      },
+      {
+        "name": "trials:bogged_step_2",
+        "stream": false
+      },
+      {
+        "name": "trials:bogged_step_3",
+        "stream": false
+      },
+      {
+        "name": "trials:bogged_step_4",
+        "stream": false
+      }
+    ]
+  },
+  "bottle_dispose": {
+    "subtitle": "subtitles.bottle_dispose",
+    "sounds": [
+      {
+        "name": "trials:bottle_dispose",
+        "stream": false
+      }
+    ]
+  }
+}
