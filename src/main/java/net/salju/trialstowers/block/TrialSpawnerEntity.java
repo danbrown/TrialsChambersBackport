@@ -1,6 +1,7 @@
 package net.salju.trialstowers.block;
 
 import net.salju.trialstowers.init.TrialsSounds;
+import net.salju.trialstowers.init.TrialsItems;
 import net.salju.trialstowers.init.TrialsBlockEntities;
 import net.salju.trialstowers.events.TrialsManager;
 import net.salju.trialstowers.TrialsTowersMod;
@@ -10,6 +11,9 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.item.armortrim.TrimPatterns;
+import net.minecraft.world.item.armortrim.TrimMaterial;
+import net.minecraft.world.item.armortrim.ArmorTrim;
 import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ItemStack;
@@ -42,9 +46,12 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.network.Connection;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.Holder;
 import net.minecraft.core.BlockPos;
 import javax.annotation.Nullable;
+import net.minecraft.world.item.Item;
 
 public class TrialSpawnerEntity extends BlockEntity {
 	private ItemStack egg;
@@ -214,17 +221,23 @@ public class TrialSpawnerEntity extends BlockEntity {
 			mobster.setDropChance(EquipmentSlot.CHEST, 0.0F);
 			mobster.setDropChance(EquipmentSlot.LEGS, 0.0F);
 			mobster.setDropChance(EquipmentSlot.FEET, 0.0F);
-			if (canWearArmor(mobster)) {
+			if (canWearArmor(mobster) && i < 35) {
+				Item template = TrialsItems.BOLT_TEMPLATE.get();
 				if (i < 4) {
+					template = TrialsItems.FLOW_TEMPLATE.get();
 					mobster.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.DIAMOND_HELMET));
 					mobster.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.DIAMOND_CHESTPLATE));
 					mobster.setItemSlot(EquipmentSlot.LEGS, new ItemStack(Items.DIAMOND_LEGGINGS));
 					mobster.setItemSlot(EquipmentSlot.FEET, new ItemStack(Items.DIAMOND_BOOTS));
-				} else if (i < 35) {
+				} else {
 					mobster.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
 					mobster.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.IRON_CHESTPLATE));
 					mobster.setItemSlot(EquipmentSlot.LEGS, new ItemStack(Items.IRON_LEGGINGS));
 					mobster.setItemSlot(EquipmentSlot.FEET, new ItemStack(Items.IRON_BOOTS));
+				}
+				Holder.Reference<TrimMaterial> material = lvl.registryAccess().registryOrThrow(Registries.TRIM_MATERIAL).getRandom(lvl.getRandom()).get();
+				for (ItemStack armor : mobster.getArmorSlots()) {
+					ArmorTrim.setTrim(lvl.registryAccess(), armor, new ArmorTrim(material, TrimPatterns.getFromTemplate(lvl.registryAccess(), new ItemStack(template)).get()));
 				}
 			}
 		}
@@ -350,4 +363,4 @@ public class TrialSpawnerEntity extends BlockEntity {
 		this.getLevel().updateNeighborsAt(this.getBlockPos(), this.getBlockState().getBlock());
 		this.getLevel().sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), 3);
 	}
-}
+}
