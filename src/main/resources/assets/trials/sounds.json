@@ -1,117 +1,9 @@
 {
-  "vault_open": {
-    "subtitle": "subtitles.vault_open",
+  "bottle_dispose": {
+    "subtitle": "subtitles.bottle_dispose",
     "sounds": [
       {
-        "name": "trials:vault_open",
-        "stream": false
-      }
-    ]
-  },
-  "vault_key": {
-    "subtitle": "subtitles.vault_key",
-    "sounds": [
-      {
-        "name": "trials:vault_insert_key",
-        "stream": false
-      }
-    ]
-  },
-  "vault_eject": {
-    "subtitle": "subtitles.vault_eject",
-    "sounds": [
-      {
-        "name": "trials:vault_eject_item_1",
-        "stream": false
-      },
-      {
-        "name": "trials:vault_eject_item_2",
-        "stream": false
-      },
-      {
-        "name": "trials:vault_eject_item_3",
-        "stream": false
-      }
-    ]
-  },
-  "vault_activate": {
-    "subtitle": "subtitles.vault_activate",
-    "sounds": [
-      {
-        "name": "trials:vault_activate",
-        "stream": false
-      }
-    ]
-  },
-  "spawner_close": {
-    "subtitle": "subtitles.spawner_close",
-    "sounds": [
-      {
-        "name": "trials:spawner_close",
-        "stream": false
-      }
-    ]
-  },
-  "spawner_detect": {
-    "subtitle": "subtitles.spawner_detect",
-    "sounds": [
-      {
-        "name": "trials:spawner_detect_player_1",
-        "stream": false
-      },
-      {
-        "name": "trials:spawner_detect_player_2",
-        "stream": false
-      },
-      {
-        "name": "trials:spawner_detect_player_3",
-        "stream": false
-      }
-    ]
-  },
-  "spawner_open": {
-    "subtitle": "subtitles.spawner_open",
-    "sounds": [
-      {
-        "name": "trials:spawner_open",
-        "stream": false
-      }
-    ]
-  },
-  "spawner_item": {
-    "subtitle": "subtitles.spawner_item",
-    "sounds": [
-      {
-        "name": "trials:spawner_item_1",
-        "stream": false
-      },
-      {
-        "name": "trials:spawner_item_2",
-        "stream": false
-      },
-      {
-        "name": "trials:spawner_item_3",
-        "stream": false
-      }
-    ]
-  },
-  "spawner_summon": {
-    "subtitle": "subtitles.spawner_summon",
-    "sounds": [
-      {
-        "name": "trials:spawner_summon_1",
-        "stream": false
-      },
-      {
-        "name": "trials:spawner_summon_2",
-        "stream": false
-      },
-      {
-        "name": "trials:spawner_summon_3",
-        "stream": false
-      },
-      {
-        "name": "trials:spawner_summon_4",
+        "name": "trials:bottle_dispose",
         "stream": false
       }
     ]
@@ -188,11 +80,183 @@
       }
     ]
   },
-  "bottle_dispose": {
-    "subtitle": "subtitles.bottle_dispose",
+  "spawner_close": {
+    "subtitle": "subtitles.spawner_close",
     "sounds": [
       {
-        "name": "trials:bottle_dispose",
+        "name": "trials:spawner_close",
+        "stream": false
+      }
+    ]
+  },
+  "spawner_detect_player": {
+    "subtitle": "subtitles.spawner_detect_player",
+    "sounds": [
+      {
+        "name": "trials:spawner_detect_player_1",
+        "stream": false
+      },
+      {
+        "name": "trials:spawner_detect_player_2",
+        "stream": false
+      },
+      {
+        "name": "trials:spawner_detect_player_3",
+        "stream": false
+      }
+    ]
+  },
+  "spawner_item": {
+    "subtitle": "subtitles.spawner_item",
+    "sounds": [
+      {
+        "name": "trials:spawner_item_1",
+        "stream": false
+      },
+      {
+        "name": "trials:spawner_item_2",
+        "stream": false
+      },
+      {
+        "name": "trials:spawner_item_3",
+        "stream": false
+      }
+    ]
+  },
+  "spawner_open": {
+    "subtitle": "subtitles.spawner_open",
+    "sounds": [
+      {
+        "name": "trials:spawner_open",
+        "stream": false
+      }
+    ]
+  },
+  "spawner_summon": {
+    "subtitle": "subtitles.spawner_summon",
+    "sounds": [
+      {
+        "name": "trials:spawner_summon_1",
+        "stream": false
+      },
+      {
+        "name": "trials:spawner_summon_2",
+        "stream": false
+      },
+      {
+        "name": "trials:spawner_summon_3",
+        "stream": false
+      },
+      {
+        "name": "trials:spawner_summon_4",
+        "stream": false
+      }
+    ]
+  },
+  "vault_activate": {
+    "subtitle": "subtitles.vault_activate",
+    "sounds": [
+      {
+        "name": "trials:vault_activate",
+        "stream": false
+      }
+    ]
+  },
+  "vault_eject": {
+    "subtitle": "subtitles.vault_eject",
+    "sounds": [
+      {
+        "name": "trials:vault_eject_item_1",
+        "stream": false
+      },
+      {
+        "name": "trials:vault_eject_item_2",
+        "stream": false
+      },
+      {
+        "name": "trials:vault_eject_item_3",
+        "stream": false
+      }
+    ]
+  },
+  "vault_insert_key": {
+    "subtitle": "subtitles.vault_insert_key",
+    "sounds": [
+      {
+        "name": "trials:vault_insert_key",
+        "stream": false
+      }
+    ]
+  },
+  "vault_open": {
+    "subtitle": "subtitles.vault_open",
+    "sounds": [
+      {
+        "name": "trials:vault_open",
+        "stream": false
+      }
+    ]
+  },
+  "mace_smash_air": {
+    "subtitle": "subtitles.mace_smash_air",
+    "sounds": [
+      {
+        "name": "trials:mace_smash_air_1",
+        "stream": false
+      },
+      {
+        "name": "trials:mace_smash_air_2",
+        "stream": false
+      },
+      {
+        "name": "trials:mace_smash_air_3",
+        "stream": false
+      }
+    ]
+  },
+  "mace_smash_ground": {
+    "subtitle": "subtitles.mace_smash_ground",
+    "sounds": [
+      {
+        "name": "trials:mace_smash_ground_1",
+        "stream": false
+      },
+      {
+        "name": "trials:mace_smash_ground_2",
+        "stream": false
+      },
+      {
+        "name": "trials:mace_smash_ground_3",
+        "stream": false
+      },
+      {
+        "name": "trials:mace_smash_ground_4",
+        "stream": false
+      }
+    ]
+  },
+  "mace_smash_ground_heavy": {
+    "subtitle": "subtitles.mace_smash_ground_heavy",
+    "sounds": [
+      {
+        "name": "trials:mace_smash_ground_heavy",
+        "stream": false
+      }
+    ]
+  },
+  "wind_charge": {
+    "subtitle": "subtitles.wind_charge",
+    "sounds": [
+      {
+        "name": "trials:wind_charge_1",
+        "stream": false
+      },
+      {
+        "name": "trials:wind_charge_2",
+        "stream": false
+      },
+      {
+        "name": "trials:wind_charge_3",
         "stream": false
       }
     ]
