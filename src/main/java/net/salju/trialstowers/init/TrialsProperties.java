@@ -1,8 +1,0 @@
-package net.salju.trialstowers.init;
-
-import net.minecraft.world.level.block.state.properties.BooleanProperty;
-
-public class TrialsProperties {
-	public static final BooleanProperty ACTIVE = BooleanProperty.create("trials_active");
-	public static final BooleanProperty EJECT = BooleanProperty.create("trials_ejecting");
-}
