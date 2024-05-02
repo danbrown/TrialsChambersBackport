@@ -13,6 +13,7 @@
     "trials:tuff_brick_slab",
     "trials:tuff_brick_wall",
     "trials:chiseled_tuff",
-    "trials:chiseled_tuff_bricks"
+    "trials:chiseled_tuff_bricks",
+    "trials:heavy_core"
   ]
 }
