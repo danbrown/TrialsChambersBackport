@@ -260,5 +260,32 @@
         "stream": false
       }
     ]
+  },
+  "music_disc_creator": {
+    "subtitle": "subtitles.music_disc_creator",
+    "sounds": [
+      {
+        "name": "trials:creator",
+        "stream": true
+      }
+    ]
+  },
+  "music_disc_creator_box": {
+    "subtitle": "subtitles.music_disc_creator_box",
+    "sounds": [
+      {
+        "name": "trials:creator_music_box",
+        "stream": true
+      }
+    ]
+  },
+  "music_disc_precipice": {
+    "subtitle": "subtitles.music_disc_precipice",
+    "sounds": [
+      {
+        "name": "trials:precipice",
+        "stream": true
+      }
+    ]
   }
 }
