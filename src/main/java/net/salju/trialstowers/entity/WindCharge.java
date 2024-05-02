@@ -3,15 +3,13 @@
 import net.salju.trialstowers.network.ApplyKnockback;
 import net.salju.trialstowers.init.TrialsModSounds;
 import net.salju.trialstowers.init.TrialsMobs;
-import net.salju.trialstowers.init.TrialsItems;
 import net.salju.trialstowers.init.TrialsEffects;
 import net.salju.trialstowers.TrialsMod;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
+import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -21,7 +19,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.core.particles.ParticleTypes;
 
-public class WindCharge extends ThrowableItemProjectile {
+public class WindCharge extends ThrowableProjectile {
 	public WindCharge(EntityType<? extends WindCharge> type, Level world) {
 		super(type, world);
 	}
@@ -42,6 +40,21 @@ public class WindCharge extends ThrowableItemProjectile {
 	}
 
 	@Override
+	protected void defineSynchedData() {
+		//
+	}
+
+	@Override
+	public void tick() {
+		super.tick();
+		if (this.isInWater()) {
+			this.setDeltaMovement(this.getDeltaMovement().scale(1.32D));
+		} else {
+			this.setDeltaMovement(this.getDeltaMovement().scale(1.02D));
+		}
+	}
+
+	@Override
 	protected void onHitEntity(EntityHitResult rez) {
 		super.onHitEntity(rez);
 		rez.getEntity().hurt(this.damageSources().thrown(this, this.getOwner()), 1.0F);
@@ -52,11 +65,6 @@ public class WindCharge extends ThrowableItemProjectile {
 	protected void onHitBlock(BlockHitResult rez) {
 		super.onHitBlock(rez);
 		this.explodeWind();
-	}
-
-	@Override
-	protected Item getDefaultItem() {
-		return TrialsItems.WIND_CHARGE.get();
 	}
 
 	@Override
