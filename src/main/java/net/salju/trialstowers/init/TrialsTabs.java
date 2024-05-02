@@ -40,5 +40,11 @@ public class TrialsTabs {
 				tabData.accept(TrialsItems.TRIAL_KEY.get());
 				tabData.accept(TrialsItems.BREEZE_ROD.get());
 				tabData.accept(TrialsItems.MACE.get());
+				tabData.accept(TrialsItems.FLOW_SHERD.get());
+				tabData.accept(TrialsItems.GUSTER_SHERD.get());
+				tabData.accept(TrialsItems.SCRAPE_SHERD.get());
+				tabData.accept(TrialsItems.MUSIC_DISC_CREATOR_BOX.get());
+				tabData.accept(TrialsItems.MUSIC_DISC_PRECIPICE.get());
+				tabData.accept(TrialsItems.MUSIC_DISC_CREATOR.get());
 			}).build());
 }

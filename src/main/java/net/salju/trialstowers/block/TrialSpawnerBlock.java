@@ -26,10 +26,11 @@ import net.minecraft.core.BlockPos;
 public class TrialSpawnerBlock extends BaseEntityBlock {
 	public static final BooleanProperty ACTIVE = TrialsProperties.ACTIVE;
 	public static final BooleanProperty EJECT = TrialsProperties.EJECT;
+	public static final BooleanProperty CURSED = TrialsProperties.CURSED;
 
 	public TrialSpawnerBlock(BlockBehaviour.Properties props) {
 		super(props);
-		this.registerDefaultState(this.stateDefinition.any().setValue(ACTIVE, true).setValue(EJECT, false));
+		this.registerDefaultState(this.stateDefinition.any().setValue(ACTIVE, true).setValue(EJECT, false).setValue(CURSED, false));
 	}
 
 	@Override
@@ -37,6 +38,7 @@ public class TrialSpawnerBlock extends BaseEntityBlock {
 		super.createBlockStateDefinition(builder);
 		builder.add(ACTIVE);
 		builder.add(EJECT);
+		builder.add(CURSED);
 	}
 
 	@Override
@@ -46,7 +48,7 @@ public class TrialSpawnerBlock extends BaseEntityBlock {
 		if (entity instanceof TrialSpawnerEntity target) {
 			if (player.isCreative() && stack.getItem() instanceof SpawnEggItem) {
 				target.setEgg(stack);
-				target.setDifficulty(Mth.nextInt(world.getRandom(), 1, 100));
+				target.setDifficulty(Mth.nextInt(world.getRandom(), 2, 100));
 				target.updateBlock();
 				return InteractionResult.SUCCESS;
 			}
@@ -81,4 +83,8 @@ public class TrialSpawnerBlock extends BaseEntityBlock {
 	public boolean isEjecting(BlockState state) {
 		return state.getValue(EJECT);
 	}
-}
+
+	public boolean isCursed(BlockState state) {
+		return state.getValue(CURSED);
+	}
+}

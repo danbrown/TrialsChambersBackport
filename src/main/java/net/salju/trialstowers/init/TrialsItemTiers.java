@@ -6,7 +6,7 @@ import net.minecraft.world.item.Tier;
 import java.util.function.Supplier;
 
 public enum TrialsItemTiers implements Tier {
-	MACE(2, 250, 4.0F, 3.0F, 14, () -> Ingredient.of(TrialsItems.BREEZE_ROD.get()));
+	MACE(2, 250, 4.0F, 3.0F, 18, () -> Ingredient.of(TrialsItems.BREEZE_ROD.get()));
 
 	private final int level;
 	private final int durability;

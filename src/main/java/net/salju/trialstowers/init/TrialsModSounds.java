@@ -33,4 +33,7 @@ public class TrialsModSounds {
 	public static final RegistryObject<SoundEvent> MACE_SMASH_GROUND = REGISTRY.register("mace_smash_ground", () -> SoundEvent.createVariableRangeEvent(new ResourceLocation("trials", "mace_smash_ground")));
 	public static final RegistryObject<SoundEvent> MACE_SMASH_GROUND_HEAVY = REGISTRY.register("mace_smash_ground_heavy", () -> SoundEvent.createVariableRangeEvent(new ResourceLocation("trials", "mace_smash_ground_heavy")));
 	public static final RegistryObject<SoundEvent> WIND_CHARGE = REGISTRY.register("wind_charge", () -> SoundEvent.createVariableRangeEvent(new ResourceLocation("trials", "wind_charge")));
+	public static final RegistryObject<SoundEvent> MUSIC_DISC_CREATOR = REGISTRY.register("music_disc_creator", () -> SoundEvent.createVariableRangeEvent(new ResourceLocation("trials", "music_disc_creator")));
+	public static final RegistryObject<SoundEvent> MUSIC_DISC_CREATOR_BOX = REGISTRY.register("music_disc_creator_box", () -> SoundEvent.createVariableRangeEvent(new ResourceLocation("trials", "music_disc_creator_box")));
+	public static final RegistryObject<SoundEvent> MUSIC_DISC_PRECIPICE = REGISTRY.register("music_disc_precipice", () -> SoundEvent.createVariableRangeEvent(new ResourceLocation("trials", "music_disc_precipice")));
 }

@@ -43,9 +43,7 @@ public class OmniItem extends Item {
 	@Override
 	public ItemStack finishUsingItem(ItemStack stack, Level world, LivingEntity target) {
 		if (target.hasEffect(MobEffects.BAD_OMEN)) {
-			int i = (target.getEffect(MobEffects.BAD_OMEN).getAmplifier() + 1);
-			target.removeEffect(MobEffects.BAD_OMEN);
-			target.addEffect(new MobEffectInstance(MobEffects.BAD_OMEN, 12000, i));
+			target.addEffect(new MobEffectInstance(MobEffects.BAD_OMEN, 12000, (target.getEffect(MobEffects.BAD_OMEN).getAmplifier() + 1)));
 		} else {
 			target.addEffect(new MobEffectInstance(MobEffects.BAD_OMEN, 12000, 0));
 		}

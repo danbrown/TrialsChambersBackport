@@ -1,15 +1,26 @@
 package net.salju.trialstowers;
 
-import org.apache.logging.log4j.Logger;
+import org.lwjgl.system.windows.MSG;
+import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import net.salju.trialstowers.init.*;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.network.simple.SimpleChannel;
+import net.minecraftforge.network.NetworkRegistry;
+import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.network.NetworkDirection;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.common.MinecraftForge;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.FriendlyByteBuf;
+import java.util.function.Supplier;
+import java.util.function.Function;
+import java.util.function.BiConsumer;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.List;
 import java.util.Collection;
 import java.util.ArrayList;
@@ -28,9 +39,24 @@ public class TrialsMod {
 		TrialsBlocks.REGISTRY.register(bus);
 		TrialsBlockEntities.REGISTRY.register(bus);
 		TrialsItems.REGISTRY.register(bus);
+		TrialsSherds.REGISTRY.register(bus);
 		TrialsBanners.REGISTRY.register(bus);
 		TrialsEnchantments.REGISTRY.register(bus);
+		TrialsEffects.REGISTRY.register(bus);
 		TrialsTabs.REGISTRY.register(bus);
+	}
+
+	private static final String V = "1";
+	public static final SimpleChannel PACKET = NetworkRegistry.newSimpleChannel(new ResourceLocation(MODID, MODID), () -> V, V::equals, V::equals);
+	private static int id = 0;
+
+	public static <T> void addNetworkMessage(Class<T> type, BiConsumer<T, FriendlyByteBuf> encoder, Function<FriendlyByteBuf, T> decoder, BiConsumer<T, Supplier<NetworkEvent.Context>> supply) {
+		PACKET.registerMessage(id, type, encoder, decoder, supply);
+		id++;
+	}
+
+	public static <MSG> void sendToClientPlayer(MSG msg, ServerPlayer ply) {
+		PACKET.sendTo(msg, ply.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
 	}
 
 	private static final Collection<AbstractMap.SimpleEntry<Runnable, Integer>> workQueue = new ConcurrentLinkedQueue<>();
@@ -52,4 +78,4 @@ public class TrialsMod {
 			workQueue.removeAll(actions);
 		}
 	}
-}
+}

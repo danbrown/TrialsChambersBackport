@@ -8,6 +8,8 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.item.SmithingTemplateItem;
+import net.minecraft.world.item.RecordItem;
+import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.BannerPatternItem;
@@ -33,14 +35,20 @@ public class TrialsItems {
 	public static final RegistryObject<Item> SPAWNER = block(TrialsBlocks.SPAWNER);
 	public static final RegistryObject<Item> VAULT = block(TrialsBlocks.VAULT);
 	public static final RegistryObject<Item> HEAVY_CORE = block(TrialsBlocks.HEAVY_CORE);
-	public static final RegistryObject<Item> MACE = REGISTRY.register("mace", () -> new MaceItem(TrialsItemTiers.MACE, 3.0F, -2.8F, new Item.Properties()));
+	public static final RegistryObject<Item> MACE = REGISTRY.register("mace", () -> new MaceItem(TrialsItemTiers.MACE, 3, -2.8F, new Item.Properties()));
 	public static final RegistryObject<Item> TRIAL_KEY = REGISTRY.register("trial_key", () -> new Item(new Item.Properties()));
 	public static final RegistryObject<Item> BREEZE_ROD = REGISTRY.register("breeze_rod", () -> new Item(new Item.Properties()));
 	public static final RegistryObject<Item> WIND_CHARGE = REGISTRY.register("wind_charge", () -> new WindItem(new Item.Properties()));
 	public static final RegistryObject<Item> TRIAL_BOTTLE = REGISTRY.register("ominous_bottle", () -> new OmniItem(new Item.Properties()));
 	public static final RegistryObject<Item> BOGGED_SPAWN_EGG = REGISTRY.register("bogged_spawn_egg", () -> new ForgeSpawnEggItem(TrialsMobs.BOGGED, -6684775, -13421773, new Item.Properties()));
+	public static final RegistryObject<Item> FLOW_SHERD = REGISTRY.register("flow_pottery_sherd", () -> new Item(new Item.Properties()));
+	public static final RegistryObject<Item> GUSTER_SHERD = REGISTRY.register("guster_pottery_sherd", () -> new Item(new Item.Properties()));
+	public static final RegistryObject<Item> SCRAPE_SHERD = REGISTRY.register("scrape_pottery_sherd", () -> new Item(new Item.Properties()));
 	public static final RegistryObject<Item> BOLT_TEMPLATE = REGISTRY.register("bolt_template", () -> SmithingTemplateItem.createArmorTrimTemplate(new ResourceLocation("bolt")));
 	public static final RegistryObject<Item> FLOW_TEMPLATE = REGISTRY.register("flow_template", () -> SmithingTemplateItem.createArmorTrimTemplate(new ResourceLocation("flow")));
+	public static final RegistryObject<Item> MUSIC_DISC_CREATOR = REGISTRY.register("music_disc_creator", () -> new RecordItem(0, () -> TrialsModSounds.MUSIC_DISC_CREATOR.get(), new Item.Properties().stacksTo(1).rarity(Rarity.RARE), 3540));
+	public static final RegistryObject<Item> MUSIC_DISC_CREATOR_BOX = REGISTRY.register("music_disc_creator_box", () -> new RecordItem(0, () -> TrialsModSounds.MUSIC_DISC_CREATOR_BOX.get(), new Item.Properties().stacksTo(1).rarity(Rarity.RARE), 1480));
+	public static final RegistryObject<Item> MUSIC_DISC_PRECIPICE = REGISTRY.register("music_disc_precipice", () -> new RecordItem(0, () -> TrialsModSounds.MUSIC_DISC_PRECIPICE.get(), new Item.Properties().stacksTo(1).rarity(Rarity.RARE), 5980));
 	public static final RegistryObject<Item> BANNER_PATTERN_FLOW = REGISTRY.register("banner_pattern_flow", () -> new BannerPatternItem(TagKey.create(Registries.BANNER_PATTERN, new ResourceLocation(TrialsMod.MODID, "pattern_for_flow")), (new Item.Properties()).stacksTo(1)));
 	public static final RegistryObject<Item> BANNER_PATTERN_GUSTER = REGISTRY.register("banner_pattern_guster", () -> new BannerPatternItem(TagKey.create(Registries.BANNER_PATTERN, new ResourceLocation(TrialsMod.MODID, "pattern_for_guster")), (new Item.Properties()).stacksTo(1)));
 

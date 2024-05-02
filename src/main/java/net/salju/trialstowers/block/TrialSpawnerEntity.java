@@ -2,12 +2,14 @@ package net.salju.trialstowers.block;
 
 import net.salju.trialstowers.init.TrialsModSounds;
 import net.salju.trialstowers.init.TrialsItems;
+import net.salju.trialstowers.init.TrialsEffects;
 import net.salju.trialstowers.init.TrialsBlockEntities;
 import net.salju.trialstowers.events.TrialsManager;
 import net.salju.trialstowers.TrialsMod;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.Level;
@@ -19,12 +21,9 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.monster.Zombie;
-import net.minecraft.world.entity.monster.Vindicator;
-import net.minecraft.world.entity.monster.Vex;
 import net.minecraft.world.entity.monster.Spider;
-import net.minecraft.world.entity.monster.Slime;
-import net.minecraft.world.entity.monster.Pillager;
 import net.minecraft.world.entity.monster.AbstractSkeleton;
+import net.minecraft.world.entity.monster.AbstractIllager;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.MobSpawnType;
@@ -41,6 +40,7 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.Containers;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.Mth;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -51,7 +51,8 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.Holder;
 import net.minecraft.core.BlockPos;
 import javax.annotation.Nullable;
-import net.minecraft.world.item.Item;
+import java.time.temporal.ChronoField;
+import java.time.LocalDate;
 
 public class TrialSpawnerEntity extends BlockEntity {
 	private ItemStack egg;
@@ -131,28 +132,24 @@ public class TrialSpawnerEntity extends BlockEntity {
 			target.updateBlock();
 			if (world instanceof ServerLevel lvl) {
 				if (block.isActive(state)) {
-					lvl.sendParticles(ParticleTypes.FLAME, (pos.getX() + 0.5), (pos.getY() + 0.5), (pos.getZ() + 0.5), 1, 0.12, 0.12, 0.12, 0);
+					lvl.sendParticles(block.isCursed(state) ? ParticleTypes.SOUL_FIRE_FLAME : ParticleTypes.FLAME, (pos.getX() + 0.5), (pos.getY() + 0.5), (pos.getZ() + 0.5), 1, 0.12, 0.12, 0.12, 0);
 					if (target.isActivelySpawning()) {
 						if (target.getRemainingEnemies() != 0) {
+							checkPlayer(world, pos, state, target);
 							if (target.getTotalEnemies() > 0) {
 								if (target.getCd() != 0) {
 									target.setCd(target.getCd() - 1);
-								} else {
+								} else if (target.getRemainingEnemies() == target.getTotalEnemies()) {
 									target.setCd(80);
-									target.setTotalEnemies(target.getTotalEnemies() - 2);
+									int e = (target.getDifficulty() <= 1 ? 3 : 2);
+									if (e > target.getTotalEnemies()) {
+										e = target.getTotalEnemies();
+									}
+									target.setTotalEnemies(target.getTotalEnemies() - e);
 									lvl.playSound(null, pos, TrialsModSounds.SPAWNER_SUMMON.get(), SoundSource.BLOCKS, 1.0F, 1.0F);
-									setUpMob(target.getSpawnType().create(lvl), lvl, target.getDifficulty(), target.findSpawnPositionNear(target.getSpawnType(), lvl, pos.above(), 2, world.getRandom()));
-									setUpMob(target.getSpawnType().create(lvl), lvl, target.getDifficulty(), target.findSpawnPositionNear(target.getSpawnType(), lvl, pos.above(), 2, world.getRandom()));
-								}
-							} else {
-								Player player = lvl.getNearestPlayer(pos.getX(), pos.getY(), pos.getZ(), 64, false);
-								if (player == null) {
-									target.setActivity(false);
-									target.setRemainingEnemies(0);
-									target.setTotalEnemies(0);
-									target.setCd(12000);
-									target.setDifficulty(Mth.nextInt(world.getRandom(), 1, 100));
-									world.setBlock(pos, state.setValue(TrialSpawnerBlock.ACTIVE, Boolean.valueOf(false)), 3);
+									for (int i = 0; i != e; ++i) {
+										setUpMob(target.getSpawnType().create(lvl), lvl, target.getDifficulty(), target.findSpawnPositionNear(target.getSpawnType(), lvl, pos.above(), 2, world.getRandom()));
+									}
 								}
 							}
 						} else if (block.isEjecting(state)) {
@@ -161,16 +158,20 @@ public class TrialSpawnerEntity extends BlockEntity {
 							} else {
 								target.setActivity(false);
 								target.setCd(36000);
-								target.setDifficulty(Mth.nextInt(world.getRandom(), 1, 100));
+								target.setDifficulty(Mth.nextInt(world.getRandom(), 2, 100));
 								lvl.playSound(null, pos, TrialsModSounds.SPAWNER_CLOSE.get(), SoundSource.BLOCKS, 1.0F, 1.0F);
-								world.setBlock(pos, state.setValue(TrialSpawnerBlock.ACTIVE, Boolean.valueOf(false)).setValue(TrialSpawnerBlock.EJECT, Boolean.valueOf(false)), 3);
+								world.setBlock(pos, state.setValue(TrialSpawnerBlock.ACTIVE, Boolean.valueOf(false)).setValue(TrialSpawnerBlock.EJECT, Boolean.valueOf(false)).setValue(TrialSpawnerBlock.CURSED, Boolean.valueOf(false)), 3);
 							}
 						} else {
 							target.setCd(40);
 							TrialsMod.queueServerWork(20, () -> {
-								for (ItemStack stack : TrialsManager.getLoot(target, world, "trials:gameplay/spawner_loot")) {
-									Containers.dropItemStack(world, pos.getX(), (pos.getY() + 1.0), pos.getZ(), stack);
-									lvl.playSound(null, pos, TrialsModSounds.SPAWNER_ITEM.get(), SoundSource.BLOCKS, 1.0F, 1.0F);
+								lvl.playSound(null, pos, TrialsModSounds.SPAWNER_ITEM.get(), SoundSource.BLOCKS, 1.0F, 1.0F);
+								if (block.isCursed(state)) {
+									Containers.dropItemStack(world, pos.getX(), (pos.getY() + 1.0), pos.getZ(), new ItemStack(TrialsItems.TRIAL_KEY.get()));
+								} else {
+									for (ItemStack stack : TrialsManager.getLoot(target, world, "trials:gameplay/spawner_loot")) {
+										Containers.dropItemStack(world, pos.getX(), (pos.getY() + 1.0), pos.getZ(), stack);
+									}
 								}
 							});
 							lvl.playSound(null, pos, TrialsModSounds.SPAWNER_OPEN.get(), SoundSource.BLOCKS, 1.0F, 1.0F);
@@ -180,16 +181,30 @@ public class TrialSpawnerEntity extends BlockEntity {
 						Player player = lvl.getNearestPlayer(pos.getX(), pos.getY(), pos.getZ(), 5, false);
 						if (player != null && !player.isCreative() && !player.isSpectator()) {
 							int i = 0;
+							if (player.hasEffect(MobEffects.BAD_OMEN)) {
+								player.addEffect(new MobEffectInstance(TrialsEffects.CURSED.get(), 12000, player.getEffect(MobEffects.BAD_OMEN).getAmplifier()));
+								player.removeEffect(MobEffects.BAD_OMEN);
+							}
 							for (Player players : lvl.getPlayers(LivingEntity::isAlive)) {
 								if (players.isCloseEnough(player, 32)) {
 									i++;
 								}
 							}
 							lvl.playSound(null, pos, TrialsModSounds.SPAWNER_DETECT_PLAYER.get(), SoundSource.BLOCKS, 1.0F, 1.0F);
-							lvl.sendParticles(ParticleTypes.FLAME, pos.getX(), (pos.getY() + 1.0), pos.getZ(), 8, 0.1, 0.1, 0.1, 0);
-							lvl.sendParticles(ParticleTypes.FLAME, (pos.getX() + 1.0), (pos.getY() + 1.0), pos.getZ(), 8, 0.1, 0.1, 0.1, 0);
-							lvl.sendParticles(ParticleTypes.FLAME, (pos.getX() + 1.0), (pos.getY() + 1.0), (pos.getZ() + 1.0), 8, 0.1, 0.1, 0.1, 0);
-							lvl.sendParticles(ParticleTypes.FLAME, pos.getX(), (pos.getY() + 1.0), (pos.getZ() + 1.0), 8, 0.1, 0.1, 0.1, 0);
+							if (player.hasEffect(TrialsEffects.CURSED.get())) {
+								target.setDifficulty(1);
+								i = (i + (2 * (player.getEffect(TrialsEffects.CURSED.get()).getAmplifier() + 1)));
+								world.setBlock(pos, state.setValue(TrialSpawnerBlock.CURSED, Boolean.valueOf(true)), 3);
+								lvl.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, pos.getX(), (pos.getY() + 1.0), pos.getZ(), 8, 0.1, 0.1, 0.1, 0);
+								lvl.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, (pos.getX() + 1.0), (pos.getY() + 1.0), pos.getZ(), 8, 0.1, 0.1, 0.1, 0);
+								lvl.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, (pos.getX() + 1.0), (pos.getY() + 1.0), (pos.getZ() + 1.0), 8, 0.1, 0.1, 0.1, 0);
+								lvl.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, pos.getX(), (pos.getY() + 1.0), (pos.getZ() + 1.0), 8, 0.1, 0.1, 0.1, 0);
+							} else {
+								lvl.sendParticles(ParticleTypes.FLAME, pos.getX(), (pos.getY() + 1.0), pos.getZ(), 8, 0.1, 0.1, 0.1, 0);
+								lvl.sendParticles(ParticleTypes.FLAME, (pos.getX() + 1.0), (pos.getY() + 1.0), pos.getZ(), 8, 0.1, 0.1, 0.1, 0);
+								lvl.sendParticles(ParticleTypes.FLAME, (pos.getX() + 1.0), (pos.getY() + 1.0), (pos.getZ() + 1.0), 8, 0.1, 0.1, 0.1, 0);
+								lvl.sendParticles(ParticleTypes.FLAME, pos.getX(), (pos.getY() + 1.0), (pos.getZ() + 1.0), 8, 0.1, 0.1, 0.1, 0);
+							}
 							target.setActivity(true);
 							target.setTotalEnemies(6 + (i * 2));
 							target.setRemainingEnemies(6 + (i * 2));
@@ -208,8 +223,22 @@ public class TrialSpawnerEntity extends BlockEntity {
 		}
 	}
 
+	public static void checkPlayer(Level world, BlockPos pos, BlockState state, TrialSpawnerEntity target) {
+		if (world instanceof ServerLevel lvl) {
+			Player player = lvl.getNearestPlayer(pos.getX(), pos.getY(), pos.getZ(), 64, false);
+			if (player == null) {
+				target.setActivity(false);
+				target.setRemainingEnemies(0);
+				target.setTotalEnemies(0);
+				target.setCd(12000);
+				target.setDifficulty(Mth.nextInt(world.getRandom(), 2, 100));
+				world.setBlock(pos, state.setValue(TrialSpawnerBlock.ACTIVE, Boolean.valueOf(false)).setValue(TrialSpawnerBlock.CURSED, Boolean.valueOf(false)), 3);
+			}
+		}
+	}
+
 	public static void setUpMob(Entity target, ServerLevel lvl, int i, BlockPos pos) {
-		lvl.sendParticles(ParticleTypes.FLAME, target.getX(), (target.getY() + 1.05), target.getZ(), 12, 0.45, 0.25, 0.45, 0);
+		lvl.sendParticles(i <= 1 ? ParticleTypes.SOUL_FIRE_FLAME : ParticleTypes.FLAME, target.getX(), (target.getY() + 1.05), target.getZ(), 12, 0.45, 0.25, 0.45, 0);
 		target.moveTo(Vec3.atBottomCenterOf(pos));
 		if (target instanceof Mob mobster) {
 			mobster.setCanPickUpLoot(false);
@@ -221,36 +250,57 @@ public class TrialSpawnerEntity extends BlockEntity {
 			mobster.setDropChance(EquipmentSlot.CHEST, 0.0F);
 			mobster.setDropChance(EquipmentSlot.LEGS, 0.0F);
 			mobster.setDropChance(EquipmentSlot.FEET, 0.0F);
-			if (canWearArmor(mobster) && i < 35) {
-				Item template = TrialsItems.BOLT_TEMPLATE.get();
-				if (i < 4) {
-					template = TrialsItems.FLOW_TEMPLATE.get();
-					mobster.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.DIAMOND_HELMET));
-					mobster.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.DIAMOND_CHESTPLATE));
-					mobster.setItemSlot(EquipmentSlot.LEGS, new ItemStack(Items.DIAMOND_LEGGINGS));
-					mobster.setItemSlot(EquipmentSlot.FEET, new ItemStack(Items.DIAMOND_BOOTS));
-				} else {
-					mobster.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Items.IRON_HELMET));
-					mobster.setItemSlot(EquipmentSlot.CHEST, new ItemStack(Items.IRON_CHESTPLATE));
-					mobster.setItemSlot(EquipmentSlot.LEGS, new ItemStack(Items.IRON_LEGGINGS));
-					mobster.setItemSlot(EquipmentSlot.FEET, new ItemStack(Items.IRON_BOOTS));
+			if (canWearArmor(mobster) && i < 45) {
+				if (LocalDate.now().get(ChronoField.DAY_OF_MONTH) == 31 && LocalDate.now().get(ChronoField.MONTH_OF_YEAR) == 10) {
+					mobster.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Math.random() <= 0.1 ? Blocks.JACK_O_LANTERN : Blocks.CARVED_PUMPKIN));
+				} else if (Math.random() >= 0.25) {
+					mobster.setItemSlot(EquipmentSlot.HEAD, new ItemStack(i <= 1 ? Items.DIAMOND_HELMET : Items.IRON_HELMET));
+				}
+				if (Math.random() >= 0.65) {
+					mobster.setItemSlot(EquipmentSlot.CHEST, new ItemStack(i <= 1 ? Items.DIAMOND_CHESTPLATE : Items.IRON_CHESTPLATE));
+				}
+				if (Math.random() >= 0.54) {
+					mobster.setItemSlot(EquipmentSlot.LEGS, new ItemStack(i <= 1 ? Items.DIAMOND_LEGGINGS : Items.IRON_LEGGINGS));
+				}
+				if (Math.random() >= 0.45) {
+					mobster.setItemSlot(EquipmentSlot.FEET, new ItemStack(i <= 1 ? Items.DIAMOND_BOOTS : Items.IRON_BOOTS));
 				}
 				Holder.Reference<TrimMaterial> material = lvl.registryAccess().registryOrThrow(Registries.TRIM_MATERIAL).getRandom(lvl.getRandom()).get();
 				for (ItemStack armor : mobster.getArmorSlots()) {
-					ArmorTrim.setTrim(lvl.registryAccess(), armor, new ArmorTrim(material, TrimPatterns.getFromTemplate(lvl.registryAccess(), new ItemStack(template)).get()));
+					if (armor.is(ItemTags.TRIMMABLE_ARMOR)) {
+						ArmorTrim.setTrim(lvl.registryAccess(), armor, new ArmorTrim(material, TrimPatterns.getFromTemplate(lvl.registryAccess(), new ItemStack(i <= 1 ? TrialsItems.FLOW_TEMPLATE.get() : TrialsItems.BOLT_TEMPLATE.get())).get()));
+					}
 				}
 			}
 		}
 		if (target instanceof Zombie billy) {
-			if (i > 95) {
-				billy.setBaby(true);
-			} else if (i > 56) {
+			if ((i > 76 || i < 21) && Math.random() >= 0.45) {
 				billy.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_SWORD));
+			}
+			if ((i > 96 || i < 6) && Math.random() >= 0.65) {
+				billy.setBaby(true);
+			}
+			if (i <= 1) {
+				if (billy.getType() == EntityType.DROWNED && Math.random() >= 0.45) {
+					billy.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.TRIDENT));
+				} else if (Math.random() >= 0.5) {
+					billy.addEffect(new MobEffectInstance(TrialsEffects.OOZE.get(), 12000, 0));
+				}
 			}
 		} else if (target instanceof AbstractSkeleton kevin) {
 			kevin.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.BOW));
+			if (i <= 1) {
+				if (Math.random() >= 0.5) {
+					kevin.addEffect(new MobEffectInstance(TrialsEffects.INFESTED.get(), 12000, 0));
+				}
+			}
 		} else if (target instanceof Spider spy) {
-			if (i > 90) {
+			if (i <= 1) {
+				spy.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 12000, 0));
+				spy.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 12000, 0));
+				spy.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 12000, 0));
+				spy.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 12000, 0));
+			} else if (i > 90) {
 				spy.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 12000, 0));
 			} else if (i > 75) {
 				spy.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 12000, 0));
@@ -259,30 +309,26 @@ public class TrialSpawnerEntity extends BlockEntity {
 			} else if (i < 25) {
 				spy.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 12000, 0));
 			}
-		} else if (target instanceof Vindicator johnny) {
-			johnny.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_AXE));
-			((GroundPathNavigation) johnny.getNavigation()).setCanOpenDoors(true);
-			if (i > 75) {
-				johnny.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 12000, 0));
+		} else if (target instanceof AbstractIllager illy) {
+			((GroundPathNavigation) illy.getNavigation()).setCanOpenDoors(true);
+			if (i <= 1) {
+				illy.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 12000, 0));
+				illy.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 12000, 0));
+				if (Math.random() >= 0.5) {
+					illy.addEffect(new MobEffectInstance(TrialsEffects.WEAVE.get(), 12000, 0));
+				}
+			} else if (i > 75) {
+				illy.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 12000, 0));
 			} else if (i < 45) {
-				johnny.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 12000, 0));
+				illy.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 12000, 0));
 			}
-		} else if (target instanceof Pillager crossbow) {
-			crossbow.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.CROSSBOW));
-			((GroundPathNavigation) crossbow.getNavigation()).setCanOpenDoors(true);
-			if (i > 75) {
-				crossbow.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 12000, 0));
-			} else if (i < 45) {
-				crossbow.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 12000, 0));
+			if (illy.getType() == EntityType.VINDICATOR) {
+				illy.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_AXE));
+			} else if (illy.getType() == EntityType.PILLAGER) {
+				illy.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.CROSSBOW));
 			}
-		} else if (target instanceof Vex ghost) {
-			ghost.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_SWORD));
-		} else if (target instanceof Slime slym) {
-			slym.setSize(2, true);
-		} else {
-			if (target instanceof Mob mobster) {
-				mobster.finalizeSpawn(lvl, new DifficultyInstance(lvl.getDifficulty(), 5L, 5L, 1.0F), MobSpawnType.SPAWNER, null, null);
-			}
+		} else if (target instanceof Mob mobster) {
+			mobster.finalizeSpawn(lvl, new DifficultyInstance(lvl.getDifficulty(), 5L, 5L, 1.0F), MobSpawnType.SPAWNER, null, null);
 		}
 		lvl.addFreshEntity(target);
 	}
@@ -363,4 +409,4 @@ public class TrialSpawnerEntity extends BlockEntity {
 		this.getLevel().updateNeighborsAt(this.getBlockPos(), this.getBlockState().getBlock());
 		this.getLevel().sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), 3);
 	}
-}
+}
