@@ -48,7 +48,7 @@ public class TuffLightBlock extends Block {
 	public void tick(BlockState state, ServerLevel lvl, BlockPos pos, RandomSource rng) {
 		if (state.getValue(POWERED) && !lvl.hasNeighborSignal(pos)) {
 			lvl.setBlock(pos, state.setValue(POWERED, false), 2);
-		} else if (lvl.hasNeighborSignal(pos)) {
+		} else if (lvl.hasNeighborSignal(pos) && !state.getValue(POWERED)) {
 			if (state.getValue(LIT)) {
 				lvl.setBlock(pos, state.setValue(LIT, false), 2);
 			} else {
