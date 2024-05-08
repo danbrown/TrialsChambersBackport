@@ -1,12 +1,12 @@
 package net.salju.trialstowers.client.renderer.layers;
 
-import net.minecraft.world.entity.monster.RangedAttackMob;
+import net.salju.trialstowers.init.TrialsModels;
+import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.model.SkeletonModel;
 import net.minecraft.client.model.EntityModel;
@@ -17,7 +17,7 @@ public class BoggedClothingLayer<T extends Mob & RangedAttackMob, M extends Enti
 
 	public BoggedClothingLayer(RenderLayerParent<T, M> parent, EntityModelSet set) {
 		super(parent);
-		this.model = new SkeletonModel<>(set.bakeLayer(ModelLayers.STRAY_OUTER_LAYER));
+		this.model = new SkeletonModel<>(set.bakeLayer(TrialsModels.BOGGED_OUTER_LAYER));
 	}
 
 	@Override

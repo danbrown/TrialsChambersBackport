@@ -1,7 +1,8 @@
 package net.salju.trialstowers.client.renderer;
 
 import org.joml.Quaternionf;
-import net.salju.trialstowers.entity.WindCharge;
+import net.salju.trialstowers.init.TrialsModels;
+import net.salju.trialstowers.entity.WindCharge;
 import net.salju.trialstowers.client.model.WindChargeModel;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.BlockPos;
@@ -19,7 +20,7 @@ public class WindChargeRenderer extends EntityRenderer<WindCharge> {
 
 	public WindChargeRenderer(EntityRendererProvider.Context context) {
 		super(context);
-		this.model = new WindChargeModel(context.bakeLayer(WindChargeModel.WIND_MODEL));
+		this.model = new WindChargeModel(context.bakeLayer(TrialsModels.WINDCHARGE));
 	}
 
 	@Override

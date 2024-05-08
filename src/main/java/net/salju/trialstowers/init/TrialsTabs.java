@@ -30,7 +30,7 @@ public class TrialsTabs {
 				tabData.accept(TrialsBlocks.SPAWNER.get().asItem());
 				tabData.accept(TrialsBlocks.VAULT.get().asItem());
 				tabData.accept(TrialsBlocks.HEAVY_CORE.get().asItem());
-				tabData.accept(TrialsItems.BOGGED_SPAWN_EGG.get());
+				tabData.accept(TrialsBlocks.CHISELED_TUFF_BULB.get().asItem());
 				tabData.accept(TrialsItems.BOLT_TEMPLATE.get());
 				tabData.accept(TrialsItems.FLOW_TEMPLATE.get());
 				tabData.accept(TrialsItems.BANNER_PATTERN_FLOW.get());
@@ -46,5 +46,6 @@ public class TrialsTabs {
 				tabData.accept(TrialsItems.MUSIC_DISC_CREATOR_BOX.get());
 				tabData.accept(TrialsItems.MUSIC_DISC_PRECIPICE.get());
 				tabData.accept(TrialsItems.MUSIC_DISC_CREATOR.get());
+				tabData.accept(TrialsItems.BOGGED_SPAWN_EGG.get());
 			}).build());
 }

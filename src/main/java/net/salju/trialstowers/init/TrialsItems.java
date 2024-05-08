@@ -32,6 +32,7 @@ public class TrialsItems {
 	public static final RegistryObject<Item> TUFF_BRICKS_WALL = block(TrialsBlocks.TUFF_BRICKS_WALL);
 	public static final RegistryObject<Item> CHISELED_TUFF = block(TrialsBlocks.CHISELED_TUFF);
 	public static final RegistryObject<Item> CHISELED_TUFF_BRICKS = block(TrialsBlocks.CHISELED_TUFF_BRICKS);
+	public static final RegistryObject<Item> CHISELED_TUFF_BULB = block(TrialsBlocks.CHISELED_TUFF_BULB);
 	public static final RegistryObject<Item> SPAWNER = block(TrialsBlocks.SPAWNER);
 	public static final RegistryObject<Item> VAULT = block(TrialsBlocks.VAULT);
 	public static final RegistryObject<Item> HEAVY_CORE = block(TrialsBlocks.HEAVY_CORE);
