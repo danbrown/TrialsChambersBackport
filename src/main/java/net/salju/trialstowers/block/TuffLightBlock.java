@@ -61,4 +61,4 @@ public class TuffLightBlock extends Block {
 	public int getLightBlock(BlockState state, BlockGetter world, BlockPos pos) {
 		return state.getValue(LIT) ? 15 : 0;
 	}
-}
+}

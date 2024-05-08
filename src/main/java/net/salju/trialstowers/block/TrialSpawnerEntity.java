@@ -238,7 +238,7 @@ public class TrialSpawnerEntity extends BlockEntity {
 	}
 
 	public static void setUpMob(Entity target, ServerLevel lvl, int i, BlockPos pos) {
-		lvl.sendParticles(i <= 1 ? ParticleTypes.SOUL_FIRE_FLAME : ParticleTypes.FLAME, target.getX(), (target.getY() + 1.05), target.getZ(), 12, 0.45, 0.25, 0.45, 0);
+		lvl.sendParticles(i <= 1 ? ParticleTypes.SOUL_FIRE_FLAME : ParticleTypes.FLAME, pos.getX(), (pos.getY() + 1.05), pos.getZ(), 12, 0.45, 0.25, 0.45, 0);
 		target.moveTo(Vec3.atBottomCenterOf(pos));
 		if (target instanceof Mob mobster) {
 			mobster.setCanPickUpLoot(false);
