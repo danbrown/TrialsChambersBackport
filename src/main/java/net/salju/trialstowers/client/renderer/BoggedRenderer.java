@@ -1,6 +1,7 @@
 package net.salju.trialstowers.client.renderer;
 
 import net.salju.trialstowers.init.TrialsModels;
+import net.salju.trialstowers.entity.Bogged;
 import net.salju.trialstowers.client.renderer.layers.BoggedClothingLayer;
 import net.minecraft.world.entity.monster.AbstractSkeleton;
 import net.minecraft.resources.ResourceLocation;
@@ -15,6 +16,9 @@ public class BoggedRenderer extends SkeletonRenderer {
 
 	@Override
 	public ResourceLocation getTextureLocation(AbstractSkeleton kevin) {
+		if (kevin instanceof Bogged boggo && !boggo.hasMushrooms()) {
+			return new ResourceLocation("trials:textures/entity/bogged_sheared.png");
+		}
 		return new ResourceLocation("trials:textures/entity/bogged.png");
 	}
 }

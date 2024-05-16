@@ -3,7 +3,6 @@ package net.salju.trialstowers.events;
 import net.salju.trialstowers.network.ApplyKnockback;
 import net.salju.trialstowers.item.MaceItem;
 import net.salju.trialstowers.init.TrialsModSounds;
-import net.salju.trialstowers.init.TrialsMobs;
 import net.salju.trialstowers.init.TrialsEnchantments;
 import net.salju.trialstowers.init.TrialsEffects;
 import net.salju.trialstowers.block.TrialSpawnerEntity;
@@ -14,16 +13,12 @@ import net.minecraftforge.event.entity.player.CriticalHitEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.monster.Slime;
-import net.minecraft.world.entity.monster.Skeleton;
 import net.minecraft.world.entity.monster.Silverfish;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Entity;
@@ -34,7 +29,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.core.BlockPos;
 
 @Mod.EventBusSubscriber
 public class TrialsEvents {
@@ -139,18 +133,6 @@ public class TrialsEvents {
 						lvl.addFreshEntity(slim);
 					}
 				}
-			}
-		}
-	}
-
-	@SubscribeEvent
-	public static void onEntitySpawn(EntityJoinLevelEvent event) {
-		Entity target = event.getEntity();
-		BlockPos pos = target.blockPosition();
-		if (event.getLevel() instanceof ServerLevel lvl && !event.loadedFromDisk()) {
-			if (lvl.getBiome(pos).is(Biomes.SWAMP) && target instanceof Skeleton) {
-				TrialsMobs.BOGGED.get().spawn(lvl, pos, MobSpawnType.NATURAL);
-				event.setCanceled(true);
 			}
 		}
 	}

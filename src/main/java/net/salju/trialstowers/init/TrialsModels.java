@@ -25,7 +25,7 @@ public class TrialsModels {
 	@SubscribeEvent
 	public static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
 		event.registerLayerDefinition(WINDCHARGE, WindChargeModel::createBodyLayer);
-		event.registerLayerDefinition(BOGGED, SkeletonModel::createBodyLayer);
+		event.registerLayerDefinition(BOGGED, BoggedModel::createBodyLayer);
 		event.registerLayerDefinition(BOGGED_OUTER_LAYER, () -> LayerDefinition.create(HumanoidModel.createMesh(new CubeDeformation(0.25F), 0.0F), 64, 32));
 		event.registerLayerDefinition(BOGGED_INNER_ARMOR, () -> LayerDefinition.create(HumanoidArmorModel.createBodyLayer(LayerDefinitions.INNER_ARMOR_DEFORMATION), 64, 32));
 		event.registerLayerDefinition(BOGGED_OUTER_ARMOR, () -> LayerDefinition.create(HumanoidArmorModel.createBodyLayer(LayerDefinitions.OUTER_ARMOR_DEFORMATION), 64, 32));
