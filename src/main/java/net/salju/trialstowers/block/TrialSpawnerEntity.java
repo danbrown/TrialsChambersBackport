@@ -10,22 +10,21 @@ import net.salju.trialstowers.TrialsMod;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.NaturalSpawner;
-import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.item.armortrim.TrimPatterns;
+import net.minecraft.world.item.armortrim.TrimMaterials;
 import net.minecraft.world.item.armortrim.TrimMaterial;
 import net.minecraft.world.item.armortrim.ArmorTrim;
 import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.monster.Spider;
+import net.minecraft.world.entity.monster.Pillager;
 import net.minecraft.world.entity.monster.AbstractSkeleton;
-import net.minecraft.world.entity.monster.AbstractIllager;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
-import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.LivingEntity;
@@ -46,13 +45,14 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.network.Connection;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.Holder;
 import net.minecraft.core.BlockPos;
 import javax.annotation.Nullable;
+import java.util.List;
 import java.time.temporal.ChronoField;
 import java.time.LocalDate;
+import com.google.common.collect.Lists;
 
 public class TrialSpawnerEntity extends BlockEntity {
 	private ItemStack egg;
@@ -128,7 +128,7 @@ public class TrialSpawnerEntity extends BlockEntity {
 	}
 
 	public static void tick(Level world, BlockPos pos, BlockState state, TrialSpawnerEntity target) {
-		if (state.getBlock() instanceof TrialSpawnerBlock block && target.getSpawnType() != null && !(world.getDifficulty() == Difficulty.PEACEFUL)) {
+		if (state.getBlock() instanceof TrialSpawnerBlock block && target.getSpawnType() != null && world.getDifficulty() != Difficulty.PEACEFUL) {
 			target.updateBlock();
 			if (world instanceof ServerLevel lvl) {
 				if (block.isActive(state)) {
@@ -199,7 +199,7 @@ public class TrialSpawnerEntity extends BlockEntity {
 								lvl.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, (pos.getX() + 1.0), (pos.getY() + 1.0), pos.getZ(), 8, 0.1, 0.1, 0.1, 0);
 								lvl.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, (pos.getX() + 1.0), (pos.getY() + 1.0), (pos.getZ() + 1.0), 8, 0.1, 0.1, 0.1, 0);
 								lvl.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, pos.getX(), (pos.getY() + 1.0), (pos.getZ() + 1.0), 8, 0.1, 0.1, 0.1, 0);
-							} else {
+							} else {
 								lvl.sendParticles(ParticleTypes.FLAME, pos.getX(), (pos.getY() + 1.0), pos.getZ(), 8, 0.1, 0.1, 0.1, 0);
 								lvl.sendParticles(ParticleTypes.FLAME, (pos.getX() + 1.0), (pos.getY() + 1.0), pos.getZ(), 8, 0.1, 0.1, 0.1, 0);
 								lvl.sendParticles(ParticleTypes.FLAME, (pos.getX() + 1.0), (pos.getY() + 1.0), (pos.getZ() + 1.0), 8, 0.1, 0.1, 0.1, 0);
@@ -265,10 +265,10 @@ public class TrialSpawnerEntity extends BlockEntity {
 				if (Math.random() >= 0.45) {
 					mobster.setItemSlot(EquipmentSlot.FEET, new ItemStack(i <= 1 ? Items.DIAMOND_BOOTS : Items.IRON_BOOTS));
 				}
-				Holder.Reference<TrimMaterial> material = lvl.registryAccess().registryOrThrow(Registries.TRIM_MATERIAL).getRandom(lvl.getRandom()).get();
+				Holder.Reference<TrimMaterial> m = getTrim(lvl);
 				for (ItemStack armor : mobster.getArmorSlots()) {
 					if (armor.is(ItemTags.TRIMMABLE_ARMOR)) {
-						ArmorTrim.setTrim(lvl.registryAccess(), armor, new ArmorTrim(material, TrimPatterns.getFromTemplate(lvl.registryAccess(), new ItemStack(i <= 1 ? TrialsItems.FLOW_TEMPLATE.get() : TrialsItems.BOLT_TEMPLATE.get())).get()));
+						ArmorTrim.setTrim(lvl.registryAccess(), armor, new ArmorTrim(m, TrimPatterns.getFromTemplate(lvl.registryAccess(), new ItemStack(i <= 1 ? TrialsItems.FLOW_TEMPLATE.get() : TrialsItems.BOLT_TEMPLATE.get())).get()));
 					}
 				}
 			}
@@ -283,14 +283,14 @@ public class TrialSpawnerEntity extends BlockEntity {
 			if (i <= 1) {
 				if (billy.getType() == EntityType.DROWNED && Math.random() >= 0.45) {
 					billy.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.TRIDENT));
-				} else if (Math.random() >= 0.5) {
+				} else if (Math.random() >= 0.65) {
 					billy.addEffect(new MobEffectInstance(TrialsEffects.OOZE.get(), 12000, 0));
 				}
 			}
 		} else if (target instanceof AbstractSkeleton kevin) {
 			kevin.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.BOW));
 			if (i <= 1) {
-				if (Math.random() >= 0.5) {
+				if (Math.random() >= 0.65) {
 					kevin.addEffect(new MobEffectInstance(TrialsEffects.INFESTED.get(), 12000, 0));
 				}
 			}
@@ -309,24 +309,20 @@ public class TrialSpawnerEntity extends BlockEntity {
 			} else if (i < 25) {
 				spy.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 12000, 0));
 			}
-		} else if (target instanceof AbstractIllager illy) {
-			((GroundPathNavigation) illy.getNavigation()).setCanOpenDoors(true);
+		} else if (target instanceof Pillager crossbow) {
+			((GroundPathNavigation) crossbow.getNavigation()).setCanOpenDoors(true);
 			if (i <= 1) {
-				illy.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 12000, 0));
-				illy.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 12000, 0));
-				if (Math.random() >= 0.5) {
-					illy.addEffect(new MobEffectInstance(TrialsEffects.WEAVE.get(), 12000, 0));
+				crossbow.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 12000, 0));
+				crossbow.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 12000, 0));
+				if (Math.random() >= 0.65) {
+					crossbow.addEffect(new MobEffectInstance(TrialsEffects.WEAVE.get(), 12000, 0));
 				}
 			} else if (i > 75) {
-				illy.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 12000, 0));
+				crossbow.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 12000, 0));
 			} else if (i < 45) {
-				illy.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 12000, 0));
+				crossbow.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 12000, 0));
 			}
-			if (illy.getType() == EntityType.VINDICATOR) {
-				illy.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_AXE));
-			} else if (illy.getType() == EntityType.PILLAGER) {
-				illy.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.CROSSBOW));
-			}
+			crossbow.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.CROSSBOW));
 		} else if (target instanceof Mob mobster) {
 			mobster.finalizeSpawn(lvl, new DifficultyInstance(lvl.getDifficulty(), 5L, 5L, 1.0F), MobSpawnType.SPAWNER, null, null);
 		}
@@ -337,6 +333,25 @@ public class TrialSpawnerEntity extends BlockEntity {
 		return (target instanceof Zombie || target instanceof AbstractSkeleton);
 	}
 
+	public static Holder.Reference<TrimMaterial> getTrim(ServerLevel lvl) {
+		int i = Mth.nextInt(lvl.getRandom(), 0, 7);
+		List<Item> list = getMats();
+		return TrimMaterials.getFromIngredient(lvl.registryAccess(), new ItemStack(list.get(i))).get();
+	}
+
+	private static List<Item> getMats() {
+		List<Item> list = Lists.newArrayList();
+		list.add(Items.COPPER_INGOT);
+		list.add(Items.IRON_INGOT);
+		list.add(Items.GOLD_INGOT);
+		list.add(Items.LAPIS_LAZULI);
+		list.add(Items.REDSTONE);
+		list.add(Items.AMETHYST_SHARD);
+		list.add(Items.EMERALD);
+		list.add(Items.DIAMOND);
+		return list;
+	}
+
 	@Nullable
 	public EntityType<?> getSpawnType() {
 		if (this.egg != null && this.egg.getItem() instanceof SpawnEggItem item) {
@@ -345,14 +360,14 @@ public class TrialSpawnerEntity extends BlockEntity {
 		return null;
 	}
 
-	public BlockPos findSpawnPositionNear(EntityType<?> type, LevelReader world, BlockPos old, int range, RandomSource random) {
+	public BlockPos findSpawnPositionNear(EntityType<?> type, ServerLevel lvl, BlockPos old, int range, RandomSource random) {
 		BlockPos pos = old;
 		for (int i = 0; i < 25; ++i) {
 			int x = old.getX() + random.nextInt(range * 2) - range;
 			int y = old.getY() + random.nextInt(range * 2) - range;
 			int z = old.getZ() + random.nextInt(range * 2) - range;
 			BlockPos test = new BlockPos(x, y, z);
-			if (NaturalSpawner.isSpawnPositionOk(SpawnPlacements.Type.ON_GROUND, world, test, type)) {
+			if (lvl.noCollision(type.getAABB(test.getX(), test.getY(), test.getZ()))) {
 				pos = test;
 				break;
 			}
