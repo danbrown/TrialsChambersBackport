@@ -48,7 +48,6 @@ public class TrialSpawnerBlock extends BaseEntityBlock {
 		if (entity instanceof TrialSpawnerEntity target) {
 			if (player.isCreative() && stack.getItem() instanceof SpawnEggItem) {
 				target.setEgg(stack);
-				target.setDifficulty(Mth.nextInt(world.getRandom(), 2, 100));
 				target.updateBlock();
 				return InteractionResult.SUCCESS;
 			}

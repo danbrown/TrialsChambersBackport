@@ -1,7 +1,8 @@
 package net.salju.trialstowers.client.model;
 
 import net.salju.trialstowers.entity.WindCharge;
-import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.util.Mth;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.CubeListBuilder;
@@ -34,7 +35,9 @@ public class WindChargeModel<T extends WindCharge> extends EntityModel<T> {
 
 	@Override
 	public void setupAnim(T target, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-		//
+		this.body.yRot += Mth.cos(1.0F * 0.04F) * 0.04F + 0.04F;
+		this.innerwinds.yRot -= Mth.cos(1.0F * 0.04F) * 0.04F + 0.04F;
+		this.outerwinds.yRot += Mth.cos(1.0F * 0.04F) * 0.04F + 0.04F;
 	}
 
 	@Override

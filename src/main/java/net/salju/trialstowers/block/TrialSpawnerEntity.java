@@ -20,10 +20,16 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.monster.ZombieVillager;
 import net.minecraft.world.entity.monster.Zombie;
+import net.minecraft.world.entity.monster.Vindicator;
+import net.minecraft.world.entity.monster.Vex;
 import net.minecraft.world.entity.monster.Spider;
+import net.minecraft.world.entity.monster.Slime;
 import net.minecraft.world.entity.monster.Pillager;
+import net.minecraft.world.entity.monster.Drowned;
 import net.minecraft.world.entity.monster.AbstractSkeleton;
+import net.minecraft.world.entity.monster.AbstractIllager;
 import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.Mob;
@@ -141,7 +147,7 @@ public class TrialSpawnerEntity extends BlockEntity {
 									target.setCd(target.getCd() - 1);
 								} else if (target.getRemainingEnemies() == target.getTotalEnemies()) {
 									target.setCd(80);
-									int e = (target.getDifficulty() <= 1 ? 3 : 2);
+									int e = (target.getDifficulty() >= 101 ? 3 : 2);
 									if (e > target.getTotalEnemies()) {
 										e = target.getTotalEnemies();
 									}
@@ -158,7 +164,6 @@ public class TrialSpawnerEntity extends BlockEntity {
 							} else {
 								target.setActivity(false);
 								target.setCd(36000);
-								target.setDifficulty(Mth.nextInt(world.getRandom(), 2, 100));
 								lvl.playSound(null, pos, TrialsModSounds.SPAWNER_CLOSE.get(), SoundSource.BLOCKS, 1.0F, 1.0F);
 								world.setBlock(pos, state.setValue(TrialSpawnerBlock.ACTIVE, Boolean.valueOf(false)).setValue(TrialSpawnerBlock.EJECT, Boolean.valueOf(false)).setValue(TrialSpawnerBlock.CURSED, Boolean.valueOf(false)), 3);
 							}
@@ -178,37 +183,48 @@ public class TrialSpawnerEntity extends BlockEntity {
 							world.setBlock(pos, state.setValue(TrialSpawnerBlock.EJECT, Boolean.valueOf(true)), 3);
 						}
 					} else {
-						Player player = lvl.getNearestPlayer(pos.getX(), pos.getY(), pos.getZ(), 5, false);
-						if (player != null && !player.isCreative() && !player.isSpectator()) {
-							int i = 0;
-							if (player.hasEffect(MobEffects.BAD_OMEN)) {
-								player.addEffect(new MobEffectInstance(TrialsEffects.CURSED.get(), 12000, player.getEffect(MobEffects.BAD_OMEN).getAmplifier()));
-								player.removeEffect(MobEffects.BAD_OMEN);
-							}
-							for (Player players : lvl.getPlayers(LivingEntity::isAlive)) {
-								if (players.isCloseEnough(player, 32)) {
-									i++;
+						Player player = lvl.getNearestPlayer(pos.getX(), pos.getY(), pos.getZ(), 8, false);
+						if (player != null) {
+							boolean check = true;
+							for (BlockPos checkpos : BlockPos.betweenClosed(pos.above(), player.blockPosition().above(2))) {
+								BlockState checkstate = lvl.getBlockState(checkpos);
+								if (checkstate.canOcclude()) {
+									check = false;
+									break;
 								}
 							}
-							lvl.playSound(null, pos, TrialsModSounds.SPAWNER_DETECT_PLAYER.get(), SoundSource.BLOCKS, 1.0F, 1.0F);
-							if (player.hasEffect(TrialsEffects.CURSED.get())) {
-								target.setDifficulty(1);
-								i = (i + (2 * (player.getEffect(TrialsEffects.CURSED.get()).getAmplifier() + 1)));
-								world.setBlock(pos, state.setValue(TrialSpawnerBlock.CURSED, Boolean.valueOf(true)), 3);
-								lvl.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, pos.getX(), (pos.getY() + 1.0), pos.getZ(), 8, 0.1, 0.1, 0.1, 0);
-								lvl.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, (pos.getX() + 1.0), (pos.getY() + 1.0), pos.getZ(), 8, 0.1, 0.1, 0.1, 0);
-								lvl.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, (pos.getX() + 1.0), (pos.getY() + 1.0), (pos.getZ() + 1.0), 8, 0.1, 0.1, 0.1, 0);
-								lvl.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, pos.getX(), (pos.getY() + 1.0), (pos.getZ() + 1.0), 8, 0.1, 0.1, 0.1, 0);
-							} else {
-								lvl.sendParticles(ParticleTypes.FLAME, pos.getX(), (pos.getY() + 1.0), pos.getZ(), 8, 0.1, 0.1, 0.1, 0);
-								lvl.sendParticles(ParticleTypes.FLAME, (pos.getX() + 1.0), (pos.getY() + 1.0), pos.getZ(), 8, 0.1, 0.1, 0.1, 0);
-								lvl.sendParticles(ParticleTypes.FLAME, (pos.getX() + 1.0), (pos.getY() + 1.0), (pos.getZ() + 1.0), 8, 0.1, 0.1, 0.1, 0);
-								lvl.sendParticles(ParticleTypes.FLAME, pos.getX(), (pos.getY() + 1.0), (pos.getZ() + 1.0), 8, 0.1, 0.1, 0.1, 0);
+							if (!player.isCreative() && !player.isSpectator() && check) {
+								int i = 0;
+								if (player.hasEffect(MobEffects.BAD_OMEN)) {
+									player.addEffect(new MobEffectInstance(TrialsEffects.CURSED.get(), 12000, player.getEffect(MobEffects.BAD_OMEN).getAmplifier()));
+									player.removeEffect(MobEffects.BAD_OMEN);
+								}
+								for (Player players : lvl.getPlayers(LivingEntity::isAlive)) {
+									if (players.isCloseEnough(player, 32)) {
+										i++;
+									}
+								}
+								lvl.playSound(null, pos, TrialsModSounds.SPAWNER_DETECT_PLAYER.get(), SoundSource.BLOCKS, 1.0F, 1.0F);
+								if (player.hasEffect(TrialsEffects.CURSED.get())) {
+									target.setDifficulty(Mth.nextInt(world.getRandom(), 101, 200));
+									i = (i + (2 * (player.getEffect(TrialsEffects.CURSED.get()).getAmplifier() + 1)));
+									world.setBlock(pos, state.setValue(TrialSpawnerBlock.CURSED, Boolean.valueOf(true)), 3);
+									lvl.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, pos.getX(), (pos.getY() + 1.0), pos.getZ(), 8, 0.1, 0.1, 0.1, 0);
+									lvl.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, (pos.getX() + 1.0), (pos.getY() + 1.0), pos.getZ(), 8, 0.1, 0.1, 0.1, 0);
+									lvl.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, (pos.getX() + 1.0), (pos.getY() + 1.0), (pos.getZ() + 1.0), 8, 0.1, 0.1, 0.1, 0);
+									lvl.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, pos.getX(), (pos.getY() + 1.0), (pos.getZ() + 1.0), 8, 0.1, 0.1, 0.1, 0);
+								} else {
+									target.setDifficulty(Mth.nextInt(world.getRandom(), 1, 100));
+									lvl.sendParticles(ParticleTypes.FLAME, pos.getX(), (pos.getY() + 1.0), pos.getZ(), 8, 0.1, 0.1, 0.1, 0);
+									lvl.sendParticles(ParticleTypes.FLAME, (pos.getX() + 1.0), (pos.getY() + 1.0), pos.getZ(), 8, 0.1, 0.1, 0.1, 0);
+									lvl.sendParticles(ParticleTypes.FLAME, (pos.getX() + 1.0), (pos.getY() + 1.0), (pos.getZ() + 1.0), 8, 0.1, 0.1, 0.1, 0);
+									lvl.sendParticles(ParticleTypes.FLAME, pos.getX(), (pos.getY() + 1.0), (pos.getZ() + 1.0), 8, 0.1, 0.1, 0.1, 0);
+								}
+								target.setActivity(true);
+								target.setTotalEnemies(6 + (i * 2));
+								target.setRemainingEnemies(6 + (i * 2));
+								target.setCd(20);
 							}
-							target.setActivity(true);
-							target.setTotalEnemies(6 + (i * 2));
-							target.setRemainingEnemies(6 + (i * 2));
-							target.setCd(20);
 						}
 					}
 				} else {
@@ -237,96 +253,109 @@ public class TrialSpawnerEntity extends BlockEntity {
 		}
 	}
 
-	public static void setUpMob(Entity target, ServerLevel lvl, int i, BlockPos pos) {
-		lvl.sendParticles(i <= 1 ? ParticleTypes.SOUL_FIRE_FLAME : ParticleTypes.FLAME, pos.getX(), (pos.getY() + 1.05), pos.getZ(), 12, 0.45, 0.25, 0.45, 0);
-		target.moveTo(Vec3.atBottomCenterOf(pos));
-		if (target instanceof Mob mobster) {
-			mobster.setCanPickUpLoot(false);
-			mobster.setPersistenceRequired();
-			mobster.getPersistentData().putInt("TrialSpawned", i);
-			mobster.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
-			mobster.setDropChance(EquipmentSlot.OFFHAND, 0.0F);
-			mobster.setDropChance(EquipmentSlot.HEAD, 0.0F);
-			mobster.setDropChance(EquipmentSlot.CHEST, 0.0F);
-			mobster.setDropChance(EquipmentSlot.LEGS, 0.0F);
-			mobster.setDropChance(EquipmentSlot.FEET, 0.0F);
-			if (canWearArmor(mobster) && i < 45) {
+	public static void setUpMob(Entity entity, ServerLevel lvl, int i, BlockPos pos) {
+		lvl.sendParticles(i >= 101 ? ParticleTypes.SOUL_FIRE_FLAME : ParticleTypes.FLAME, pos.getX(), (pos.getY() + 1.05), pos.getZ(), 12, 0.45, 0.25, 0.45, 0);
+		entity.moveTo(Vec3.atBottomCenterOf(pos));
+		if (entity instanceof Mob target) {
+			target.setCanPickUpLoot(false);
+			target.setPersistenceRequired();
+			target.getPersistentData().putInt("TrialSpawned", i);
+			target.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
+			target.setDropChance(EquipmentSlot.OFFHAND, 0.0F);
+			target.setDropChance(EquipmentSlot.HEAD, 0.0F);
+			target.setDropChance(EquipmentSlot.CHEST, 0.0F);
+			target.setDropChance(EquipmentSlot.LEGS, 0.0F);
+			target.setDropChance(EquipmentSlot.FEET, 0.0F);
+			if (canWearArmor(target) && i > 65) {
 				if (LocalDate.now().get(ChronoField.DAY_OF_MONTH) == 31 && LocalDate.now().get(ChronoField.MONTH_OF_YEAR) == 10) {
-					mobster.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Math.random() <= 0.1 ? Blocks.JACK_O_LANTERN : Blocks.CARVED_PUMPKIN));
+					target.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Math.random() <= 0.1 ? Blocks.JACK_O_LANTERN : Blocks.CARVED_PUMPKIN));
 				} else if (Math.random() >= 0.25) {
-					mobster.setItemSlot(EquipmentSlot.HEAD, new ItemStack(i <= 1 ? Items.DIAMOND_HELMET : Items.IRON_HELMET));
+					target.setItemSlot(EquipmentSlot.HEAD, new ItemStack(i >= 101 ? Items.DIAMOND_HELMET : Items.IRON_HELMET));
 				}
 				if (Math.random() >= 0.65) {
-					mobster.setItemSlot(EquipmentSlot.CHEST, new ItemStack(i <= 1 ? Items.DIAMOND_CHESTPLATE : Items.IRON_CHESTPLATE));
+					target.setItemSlot(EquipmentSlot.CHEST, new ItemStack(i >= 101 ? Items.DIAMOND_CHESTPLATE : Items.IRON_CHESTPLATE));
 				}
 				if (Math.random() >= 0.54) {
-					mobster.setItemSlot(EquipmentSlot.LEGS, new ItemStack(i <= 1 ? Items.DIAMOND_LEGGINGS : Items.IRON_LEGGINGS));
+					target.setItemSlot(EquipmentSlot.LEGS, new ItemStack(i >= 101 ? Items.DIAMOND_LEGGINGS : Items.IRON_LEGGINGS));
 				}
 				if (Math.random() >= 0.45) {
-					mobster.setItemSlot(EquipmentSlot.FEET, new ItemStack(i <= 1 ? Items.DIAMOND_BOOTS : Items.IRON_BOOTS));
+					target.setItemSlot(EquipmentSlot.FEET, new ItemStack(i >= 101 ? Items.DIAMOND_BOOTS : Items.IRON_BOOTS));
 				}
 				Holder.Reference<TrimMaterial> m = getTrim(lvl);
-				for (ItemStack armor : mobster.getArmorSlots()) {
+				for (ItemStack armor : target.getArmorSlots()) {
 					if (armor.is(ItemTags.TRIMMABLE_ARMOR)) {
 						ArmorTrim.setTrim(lvl.registryAccess(), armor, new ArmorTrim(m, TrimPatterns.getFromTemplate(lvl.registryAccess(), new ItemStack(i <= 1 ? TrialsItems.FLOW_TEMPLATE.get() : TrialsItems.BOLT_TEMPLATE.get())).get()));
 					}
 				}
 			}
+			if (target instanceof Zombie) {
+				if ((i > 76 || i < 21) && Math.random() >= 0.45) {
+					target.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_SWORD));
+				}
+				if (i >= 101) {
+					if (target instanceof Drowned && Math.random() >= 0.45) {
+						target.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.TRIDENT));
+					} else if (Math.random() >= 0.65) {
+						target.addEffect(new MobEffectInstance(TrialsEffects.OOZE.get(), 12000, 0));
+					}
+				}
+			} else if (target instanceof AbstractSkeleton) {
+				target.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.BOW));
+				if (i >= 101) {
+					if (Math.random() >= 0.65) {
+						target.addEffect(new MobEffectInstance(TrialsEffects.INFESTED.get(), 12000, 0));
+					}
+				}
+			} else if (target instanceof Spider) {
+				if (i >= 101) {
+					if (Math.random() >= 0.65) {
+						target.addEffect(new MobEffectInstance(TrialsEffects.WEAVE.get(), 12000, 0));
+					}
+					target.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 12000, 0));
+					target.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 12000, 0));
+					target.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 12000, 0));
+					target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 12000, 0));
+				} else if (i > 90) {
+					target.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 12000, 0));
+				} else if (i > 75) {
+					target.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 12000, 0));
+				} else if (i < 10) {
+					target.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 12000, 0));
+				} else if (i < 25) {
+					target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 12000, 0));
+				}
+			} else if (target instanceof AbstractIllager) {
+				((GroundPathNavigation) target.getNavigation()).setCanOpenDoors(true);
+				if (i >= 101) {
+					if (Math.random() >= 0.65) {
+						target.addEffect(new MobEffectInstance(TrialsEffects.WINDED.get(), 12000, 0));
+					}
+					target.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 12000, 0));
+					target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 12000, 0));
+				} else if (i > 75) {
+					target.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 12000, 0));
+				} else if (i < 45) {
+					target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 12000, 0));
+				}
+				if (target instanceof Pillager) {
+					target.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.CROSSBOW));
+				} else if (target instanceof Vindicator) {
+					target.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_AXE));
+				}
+			} else if (target instanceof Vex) {
+				target.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_SWORD));
+				target.setLeftHanded(false);
+			} else if (target instanceof Slime slym) {
+				if (i >= 101) {
+					slym.setSize(3, true);
+				} else {
+					slym.setSize(2, true);
+				}
+			} else {
+				target.finalizeSpawn(lvl, new DifficultyInstance(lvl.getDifficulty(), 5L, 5L, 1.0F), MobSpawnType.SPAWNER, null, null);
+			}
 		}
-		if (target instanceof Zombie billy) {
-			if ((i > 76 || i < 21) && Math.random() >= 0.45) {
-				billy.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_SWORD));
-			}
-			if ((i > 96 || i < 6) && Math.random() >= 0.65) {
-				billy.setBaby(true);
-			}
-			if (i <= 1) {
-				if (billy.getType() == EntityType.DROWNED && Math.random() >= 0.45) {
-					billy.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.TRIDENT));
-				} else if (Math.random() >= 0.65) {
-					billy.addEffect(new MobEffectInstance(TrialsEffects.OOZE.get(), 12000, 0));
-				}
-			}
-		} else if (target instanceof AbstractSkeleton kevin) {
-			kevin.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.BOW));
-			if (i <= 1) {
-				if (Math.random() >= 0.65) {
-					kevin.addEffect(new MobEffectInstance(TrialsEffects.INFESTED.get(), 12000, 0));
-				}
-			}
-		} else if (target instanceof Spider spy) {
-			if (i <= 1) {
-				spy.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 12000, 0));
-				spy.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 12000, 0));
-				spy.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 12000, 0));
-				spy.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 12000, 0));
-			} else if (i > 90) {
-				spy.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 12000, 0));
-			} else if (i > 75) {
-				spy.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 12000, 0));
-			} else if (i < 10) {
-				spy.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 12000, 0));
-			} else if (i < 25) {
-				spy.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 12000, 0));
-			}
-		} else if (target instanceof Pillager crossbow) {
-			((GroundPathNavigation) crossbow.getNavigation()).setCanOpenDoors(true);
-			if (i <= 1) {
-				crossbow.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 12000, 0));
-				crossbow.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 12000, 0));
-				if (Math.random() >= 0.65) {
-					crossbow.addEffect(new MobEffectInstance(TrialsEffects.WEAVE.get(), 12000, 0));
-				}
-			} else if (i > 75) {
-				crossbow.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 12000, 0));
-			} else if (i < 45) {
-				crossbow.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 12000, 0));
-			}
-			crossbow.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.CROSSBOW));
-		} else if (target instanceof Mob mobster) {
-			mobster.finalizeSpawn(lvl, new DifficultyInstance(lvl.getDifficulty(), 5L, 5L, 1.0F), MobSpawnType.SPAWNER, null, null);
-		}
-		lvl.addFreshEntity(target);
+		lvl.addFreshEntity(entity);
 	}
 
 	public static boolean canWearArmor(Entity target) {
@@ -424,4 +453,4 @@ public class TrialSpawnerEntity extends BlockEntity {
 		this.getLevel().updateNeighborsAt(this.getBlockPos(), this.getBlockState().getBlock());
 		this.getLevel().sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), 3);
 	}
-}
+}

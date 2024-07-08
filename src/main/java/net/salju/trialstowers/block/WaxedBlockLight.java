@@ -1,6 +1,7 @@
 package net.salju.trialstowers.block;
 
-import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.salju.trialstowers.init.TrialsBlocks;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.BlockState;
@@ -12,11 +13,11 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.core.BlockPos;
 
-public class TuffLightBlock extends Block {
+public class WaxedBlockLight extends WaxedBlockBase {
 	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 	public static final BooleanProperty LIT = BlockStateProperties.LIT;
 
-	public TuffLightBlock(BlockBehaviour.Properties props) {
+	public WaxedBlockLight(BlockBehaviour.Properties props) {
 		super(props);
 		this.registerDefaultState(this.stateDefinition.any().setValue(POWERED, false).setValue(LIT, false));
 	}
@@ -62,6 +63,18 @@ public class TuffLightBlock extends Block {
 
 	@Override
 	public int getLightBlock(BlockState state, BlockGetter world, BlockPos pos) {
-		return state.getValue(LIT) ? 15 : 0;
+		return state.getValue(LIT) ? getCopperLight(state) : 0;
+	}
+
+	public int getCopperLight(BlockState state) {
+		if (state.is(TrialsBlocks.WAXED_EX_COPPER_BULB.get())) {
+			return 12;
+		} else if (state.is(TrialsBlocks.WAXED_W_COPPER_BULB.get())) {
+			return 8;
+		} else if (state.is(TrialsBlocks.WAXED_OXI_COPPER_BULB.get())) {
+			return 4;
+		} else {
+			return 15;
+		}
 	}
 }
