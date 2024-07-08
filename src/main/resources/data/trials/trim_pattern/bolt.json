@@ -1,7 +1,0 @@
-{
-  "asset_id": "trials:bolt",
-  "description": {
-    "translate": "trim_pattern.minecraft.bolt"
-  },
-  "template_item": "trials:bolt_template"
-}

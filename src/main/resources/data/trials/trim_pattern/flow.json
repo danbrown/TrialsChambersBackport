@@ -1,7 +1,0 @@
-{
-  "asset_id": "trials:flow",
-  "description": {
-    "translate": "trim_pattern.minecraft.flow"
-  },
-  "template_item": "trials:flow_template"
-}

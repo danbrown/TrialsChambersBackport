@@ -1,8 +1,0 @@
-{
-  "type": "minecraft:stonecutting",
-  "ingredient": {
-    "item": "trials:polished_tuff"
-  },
-  "result": "trials:tuff_bricks",
-  "count": 1
-}
