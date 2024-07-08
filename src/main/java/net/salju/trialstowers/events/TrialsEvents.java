@@ -2,23 +2,24 @@ package net.salju.trialstowers.events;
 
 import net.salju.trialstowers.network.ApplyKnockback;
 import net.salju.trialstowers.item.MaceItem;
+import net.salju.trialstowers.init.TrialsTags;
 import net.salju.trialstowers.init.TrialsModSounds;
 import net.salju.trialstowers.init.TrialsItems;
 import net.salju.trialstowers.init.TrialsEnchantments;
 import net.salju.trialstowers.init.TrialsEffects;
 import net.salju.trialstowers.block.TrialSpawnerEntity;
 import net.salju.trialstowers.TrialsMod;
-
-import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.eventbus.api.Event.Result;
+import net.minecraftforge.event.village.VillagerTradesEvent;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
 import net.minecraftforge.event.entity.living.MobEffectEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
-
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.LeverBlock;
 import net.minecraft.world.level.block.ButtonBlock;
@@ -28,6 +29,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.monster.Slime;
 import net.minecraft.world.entity.monster.Silverfish;
 import net.minecraft.world.entity.LivingEntity;
@@ -142,6 +144,15 @@ public class TrialsEvents {
 				player.fallDistance = 0.0F;
 				event.setDamageModifier(event.getDamageModifier() + (0.1F * f));
 			}
+		}
+	}
+
+	@SubscribeEvent
+	public static void onTrades(VillagerTradesEvent event) {
+		final var middle = event.getTrades().get(3);
+		if (event.getType() == VillagerProfession.CARTOGRAPHER) {
+			middle.add(new TrialsVillagerManager.TreasureMapForEmeralds(14, TrialsTags.TRIALS_MAPS, "filled_map.trials.chambers", MapDecoration.Type.TARGET_X, 12, 10));
+			event.getTrades().put(3, middle);
 		}
 	}
 
