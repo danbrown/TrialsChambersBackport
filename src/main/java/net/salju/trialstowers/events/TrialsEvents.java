@@ -3,32 +3,45 @@ package net.salju.trialstowers.events;
 import net.salju.trialstowers.network.ApplyKnockback;
 import net.salju.trialstowers.item.MaceItem;
 import net.salju.trialstowers.init.TrialsModSounds;
+import net.salju.trialstowers.init.TrialsItems;
 import net.salju.trialstowers.init.TrialsEnchantments;
 import net.salju.trialstowers.init.TrialsEffects;
 import net.salju.trialstowers.block.TrialSpawnerEntity;
 import net.salju.trialstowers.TrialsMod;
-import net.minecraftforge.fml.common.Mod;
+
+import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.eventbus.api.Event.Result;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
+import net.minecraftforge.event.entity.living.MobEffectEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
-import net.minecraft.world.phys.Vec3;
+
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.LeverBlock;
+import net.minecraft.world.level.block.ButtonBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.monster.Slime;
 import net.minecraft.world.entity.monster.Silverfish;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.Containers;
 import net.minecraft.util.Mth;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.BlockPos;
 
 @Mod.EventBusSubscriber
 public class TrialsEvents {
@@ -50,9 +63,6 @@ public class TrialsEvents {
 						target.level().setBlock(target.blockPosition(), Blocks.COBWEB.defaultBlockState(), 3);
 					}
 				}
-			}
-			if (event.getSource().is(DamageTypes.FALL) && target.hasEffect(TrialsEffects.WINDED.get())) {
-				event.setAmount(0.0F);
 			}
 			if (event.getSource().getDirectEntity() != null && event.getSource().getDirectEntity() instanceof LivingEntity meanie) {
 				if (meanie.getMainHandItem().getItem() instanceof MaceItem mace) {
@@ -84,15 +94,35 @@ public class TrialsEvents {
 		Entity target = event.getTarget();
 		if (event.isVanillaCritical() && player.getMainHandItem().getItem() instanceof MaceItem && player.level() instanceof ServerLevel lvl) {
 			int e = EnchantmentHelper.getItemEnchantmentLevel(TrialsEnchantments.WIND.get(), player.getMainHandItem());
-			double y = ((double) Mth.nextInt(player.level().getRandom(), 2, 3) * e);
 			if (e > 0) {
-				if (player instanceof ServerPlayer ply) {
-					TrialsMod.sendToClientPlayer(new ApplyKnockback(y), ply);
+				for (LivingEntity targets : target.level().getEntitiesOfClass(LivingEntity.class, target.getBoundingBox().inflate(5.76F))) {
+					if (targets.hasLineOfSight(target)) {
+						targets.fallDistance = 0.0F;
+						double d = target.distanceTo(targets) * 0.65;
+						if (targets == player) {
+							d = 0;
+						}
+						double y = (((double) Mth.nextInt(targets.level().getRandom(), 2, 3) * e) - d);
+						if (targets instanceof ServerPlayer ply) {
+							TrialsMod.sendToClientPlayer(new ApplyKnockback(y), ply);
+						} else if (targets.getDeltaMovement().y() <= 5.0) {
+							targets.addDeltaMovement(new Vec3(targets.getDeltaMovement().x(), (y * 0.15), targets.getDeltaMovement().z()));
+						}
+					}
 				}
-				player.addEffect(new MobEffectInstance(TrialsEffects.WINDED.get(), 45, 0));
-				lvl.sendParticles(ParticleTypes.CLOUD, player.getX(), player.getY(), player.getZ(), 8, 1.5, 0.15, 1.5, 0);
-				lvl.sendParticles(ParticleTypes.EXPLOSION, player.getX(), player.getY(), player.getZ(), 4, 1.8, 0.15, 1.8, 0);
-				lvl.playSound(null, player.blockPosition(), TrialsModSounds.WIND_CHARGE.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
+				BlockPos top = BlockPos.containing((target.getX() + 4), (target.getY() + 2), (target.getZ() + 4));
+				BlockPos bot = BlockPos.containing((target.getX() - 4), (target.getY() - 2), (target.getZ() - 4));
+				for (BlockPos pos : BlockPos.betweenClosed(top, bot)) {
+					BlockState state = lvl.getBlockState(pos);
+					if (state.getBlock() instanceof LeverBlock blok) {
+						blok.pull(state, target.level(), pos);
+					} else if (state.getBlock() instanceof ButtonBlock blok) {
+						blok.press(state, target.level(), pos);
+					}
+				}
+				lvl.sendParticles(ParticleTypes.CLOUD, target.getX(), target.getY(), target.getZ(), 8, 1.5, 0.15, 1.5, 0);
+				lvl.sendParticles(ParticleTypes.EXPLOSION, target.getX(), target.getY(), target.getZ(), 4, 1.8, 0.15, 1.8, 0);
+				lvl.playSound(null, target.blockPosition(), TrialsModSounds.WIND_CHARGE.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
 			}
 			if (player.fallDistance > 3.0F) {
 				int i = EnchantmentHelper.getItemEnchantmentLevel(TrialsEnchantments.DENSITY.get(), player.getMainHandItem());
@@ -116,6 +146,13 @@ public class TrialsEvents {
 	}
 
 	@SubscribeEvent
+	public static void onEffect(MobEffectEvent.Applicable event) {
+		if (event.getEntity() instanceof Player && event.getEffectInstance().getEffect() == MobEffects.BAD_OMEN && event.getEffectInstance().getDuration() == 120000) {
+			event.setResult(Result.DENY);
+		}
+	}
+
+	@SubscribeEvent
 	public static void onDeath(LivingDeathEvent event) {
 		if (event.getEntity() != null) {
 			LivingEntity target = event.getEntity();
@@ -123,6 +160,37 @@ public class TrialsEvents {
 				TrialSpawnerEntity block = TrialsManager.getSpawner(target, target.blockPosition(), lvl, 64);
 				if (block != null) {
 					block.setRemainingEnemies(block.getRemainingEnemies() - 1);
+				}
+				if (target instanceof Raider && target.getItemBySlot(EquipmentSlot.HEAD).getItem() == Items.WHITE_BANNER) {
+					Containers.dropItemStack(target.level(), target.getX(), target.getY(), target.getZ(), new ItemStack(TrialsItems.TRIAL_BOTTLE.get()));
+				}
+				if (target.hasEffect(TrialsEffects.WINDED.get())) {
+					int e = (target.getEffect(TrialsEffects.WINDED.get()).getAmplifier() + 2);
+					for (LivingEntity targets : target.level().getEntitiesOfClass(LivingEntity.class, target.getBoundingBox().inflate(5.76F))) {
+						if (targets.hasLineOfSight(target)) {
+							targets.fallDistance = 0.0F;
+							double d = target.distanceTo(targets) * 0.65;
+							double y = (((double) Mth.nextInt(targets.level().getRandom(), 2, 3) * e) - d);
+							if (targets instanceof ServerPlayer ply) {
+								TrialsMod.sendToClientPlayer(new ApplyKnockback(y), ply);
+							} else if (targets.getDeltaMovement().y() <= 5.0) {
+								targets.addDeltaMovement(new Vec3(targets.getDeltaMovement().x(), (y * 0.15), targets.getDeltaMovement().z()));
+							}
+						}
+					}
+					BlockPos top = BlockPos.containing((target.getX() + 4), (target.getY() + 2), (target.getZ() + 4));
+					BlockPos bot = BlockPos.containing((target.getX() - 4), (target.getY() - 2), (target.getZ() - 4));
+					for (BlockPos pos : BlockPos.betweenClosed(top, bot)) {
+						BlockState state = lvl.getBlockState(pos);
+						if (state.getBlock() instanceof LeverBlock blok) {
+							blok.pull(state, target.level(), pos);
+						} else if (state.getBlock() instanceof ButtonBlock blok) {
+							blok.press(state, target.level(), pos);
+						}
+					}
+					lvl.sendParticles(ParticleTypes.CLOUD, target.getX(), target.getY(), target.getZ(), 8, 1.5, 0.15, 1.5, 0);
+					lvl.sendParticles(ParticleTypes.EXPLOSION, target.getX(), target.getY(), target.getZ(), 4, 1.8, 0.15, 1.8, 0);
+					lvl.playSound(null, target.blockPosition(), TrialsModSounds.WIND_CHARGE.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
 				}
 				if (target.hasEffect(TrialsEffects.OOZE.get())) {
 					int e = (2 * (target.getEffect(TrialsEffects.OOZE.get()).getAmplifier() + 1));

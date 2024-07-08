@@ -44,6 +44,7 @@ public class TrialsMod {
 		TrialsPaintings.REGISTRY.register(bus);
 		TrialsEnchantments.REGISTRY.register(bus);
 		TrialsEffects.REGISTRY.register(bus);
+		TrialsPotions.REGISTRY.register(bus);
 		TrialsTabs.REGISTRY.register(bus);
 	}
 
