@@ -1,7 +1,7 @@
 package net.salju.trialstowers.block;
 
-import net.salju.trialstowers.init.TrialsModSounds;
 import net.salju.trialstowers.init.TrialsProperties;
+import net.salju.trialstowers.init.TrialsModSounds;
 import net.salju.trialstowers.init.TrialsItems;
 import net.salju.trialstowers.init.TrialsBlockEntities;
 import net.minecraft.world.phys.BlockHitResult;
@@ -28,10 +28,12 @@ import net.minecraft.core.BlockPos;
 public class TrialVaultBlock extends BaseEntityBlock {
 	public static final BooleanProperty ACTIVE = TrialsProperties.ACTIVE;
 	public static final BooleanProperty EJECT = TrialsProperties.EJECT;
+	private final boolean isOminous;
 
-	public TrialVaultBlock(BlockBehaviour.Properties props) {
+	public TrialVaultBlock(BlockBehaviour.Properties props, boolean check) {
 		super(props);
 		this.registerDefaultState(this.stateDefinition.any().setValue(ACTIVE, true).setValue(EJECT, false));
+		this.isOminous = check;
 	}
 
 	@Override
@@ -46,7 +48,7 @@ public class TrialVaultBlock extends BaseEntityBlock {
 		BlockEntity entity = world.getBlockEntity(pos);
 		ItemStack stack = player.getItemInHand(hand);
 		if (entity instanceof TrialVaultEntity target && isActive(state) && !isEjecting(state)) {
-			if (stack.is(TrialsItems.TRIAL_KEY.get())) {
+			if (stack.is(this.isOminous ? TrialsItems.TRIAL_KEY_OMNI.get() : TrialsItems.TRIAL_KEY.get())) {
 				world.setBlock(pos, state.setValue(EJECT, Boolean.valueOf(true)), 3);
 				if (!player.isCreative()) {
 					stack.shrink(1);
@@ -67,7 +69,9 @@ public class TrialVaultBlock extends BaseEntityBlock {
 
 	@Override
 	public @Nullable BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-		return new TrialVaultEntity(pos, state);
+		TrialVaultEntity vault = new TrialVaultEntity(pos, state);
+		vault.setVault(this.isOminous);
+		return vault;
 	}
 
 	@Override
@@ -87,4 +91,4 @@ public class TrialVaultBlock extends BaseEntityBlock {
 	public boolean isEjecting(BlockState state) {
 		return state.getValue(EJECT);
 	}
-}
+}

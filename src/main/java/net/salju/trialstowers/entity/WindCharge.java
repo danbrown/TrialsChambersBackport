@@ -77,7 +77,7 @@ public class WindCharge extends ThrowableProjectile {
 	public void explodeWind() {
 		if (this.level() instanceof ServerLevel lvl) {
 			for (LivingEntity target : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(5.76F))) {
-				if (target.hasLineOfSight(this)) {
+				if (target.hasLineOfSight(this) && target.isAlive()) {
 					target.fallDistance = 0.0F;
 					double d = this.distanceTo(target) * 0.65;
 					double y = (((double) Mth.nextInt(target.level().getRandom(), 2, 3) * (target.isCrouching() ? 4 : 2)) - d);

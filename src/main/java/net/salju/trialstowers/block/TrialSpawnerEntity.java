@@ -171,12 +171,8 @@ public class TrialSpawnerEntity extends BlockEntity {
 							target.setCd(40);
 							TrialsMod.queueServerWork(20, () -> {
 								lvl.playSound(null, pos, TrialsModSounds.SPAWNER_ITEM.get(), SoundSource.BLOCKS, 1.0F, 1.0F);
-								if (block.isCursed(state)) {
-									Containers.dropItemStack(world, pos.getX(), (pos.getY() + 1.0), pos.getZ(), new ItemStack(TrialsItems.TRIAL_KEY.get()));
-								} else {
-									for (ItemStack stack : TrialsManager.getLoot(target, world, "trials:gameplay/spawner_loot")) {
-										Containers.dropItemStack(world, pos.getX(), (pos.getY() + 1.0), pos.getZ(), stack);
-									}
+								for (ItemStack stack : TrialsManager.getLoot(target, world, (block.isCursed(state) ? "trials:gameplay/spawner_special_loot" : "trials:gameplay/spawner_loot"))) {
+									Containers.dropItemStack(world, pos.getX(), (pos.getY() + 1.0), pos.getZ(), stack);
 								}
 							});
 							lvl.playSound(null, pos, TrialsModSounds.SPAWNER_OPEN.get(), SoundSource.BLOCKS, 1.0F, 1.0F);
@@ -200,20 +196,21 @@ public class TrialSpawnerEntity extends BlockEntity {
 									player.removeEffect(MobEffects.BAD_OMEN);
 								}
 								for (Player players : lvl.getPlayers(LivingEntity::isAlive)) {
-									if (players.isCloseEnough(player, 32)) {
+									if (players.isCloseEnough(player, 32) && !players.isCreative() && !players.isSpectator()) {
 										i++;
 									}
 								}
 								lvl.playSound(null, pos, TrialsModSounds.SPAWNER_DETECT_PLAYER.get(), SoundSource.BLOCKS, 1.0F, 1.0F);
 								if (player.hasEffect(TrialsEffects.CURSED.get())) {
 									target.setDifficulty(Mth.nextInt(world.getRandom(), 101, 200));
-									i = (i + (2 * (player.getEffect(TrialsEffects.CURSED.get()).getAmplifier() + 1)));
+									i = (6 + (i * 3) + (player.getEffect(TrialsEffects.CURSED.get()).getAmplifier() * 3));
 									world.setBlock(pos, state.setValue(TrialSpawnerBlock.CURSED, Boolean.valueOf(true)), 3);
 									lvl.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, pos.getX(), (pos.getY() + 1.0), pos.getZ(), 8, 0.1, 0.1, 0.1, 0);
 									lvl.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, (pos.getX() + 1.0), (pos.getY() + 1.0), pos.getZ(), 8, 0.1, 0.1, 0.1, 0);
 									lvl.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, (pos.getX() + 1.0), (pos.getY() + 1.0), (pos.getZ() + 1.0), 8, 0.1, 0.1, 0.1, 0);
 									lvl.sendParticles(ParticleTypes.SOUL_FIRE_FLAME, pos.getX(), (pos.getY() + 1.0), (pos.getZ() + 1.0), 8, 0.1, 0.1, 0.1, 0);
 								} else {
+									i = (4 + (i * 2));
 									target.setDifficulty(Mth.nextInt(world.getRandom(), 1, 100));
 									lvl.sendParticles(ParticleTypes.FLAME, pos.getX(), (pos.getY() + 1.0), pos.getZ(), 8, 0.1, 0.1, 0.1, 0);
 									lvl.sendParticles(ParticleTypes.FLAME, (pos.getX() + 1.0), (pos.getY() + 1.0), pos.getZ(), 8, 0.1, 0.1, 0.1, 0);
@@ -221,8 +218,8 @@ public class TrialSpawnerEntity extends BlockEntity {
 									lvl.sendParticles(ParticleTypes.FLAME, pos.getX(), (pos.getY() + 1.0), (pos.getZ() + 1.0), 8, 0.1, 0.1, 0.1, 0);
 								}
 								target.setActivity(true);
-								target.setTotalEnemies(6 + (i * 2));
-								target.setRemainingEnemies(6 + (i * 2));
+								target.setTotalEnemies(i);
+								target.setRemainingEnemies(i);
 								target.setCd(20);
 							}
 						}

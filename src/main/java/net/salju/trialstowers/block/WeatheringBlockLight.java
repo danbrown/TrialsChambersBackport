@@ -63,6 +63,16 @@ public class WeatheringBlockLight extends WeatheringBlockBase {
 	}
 
 	@Override
+	public boolean hasAnalogOutputSignal(BlockState state) {
+		return state.getValue(LIT);
+	}
+
+	@Override
+	public int getAnalogOutputSignal(BlockState state, Level world, BlockPos pos) {
+		return (state.getValue(LIT) ? 15 : 0);
+	}
+
+	@Override
 	public int getLightBlock(BlockState state, BlockGetter world, BlockPos pos) {
 		return state.getValue(LIT) ? getCopperLight(state) : 0;
 	}

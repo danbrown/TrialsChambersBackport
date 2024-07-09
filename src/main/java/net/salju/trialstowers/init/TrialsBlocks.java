@@ -77,7 +77,8 @@ public class TrialsBlocks {
 	public static final RegistryObject<Block> WAXED_W_COPPER_BULB = REGISTRY.register("waxed_copper_bulb_weathered", () -> new WaxedBlockLight(BlockBehaviour.Properties.copy(CHISELED_COPPER.get()).lightLevel(checkLight(8))));
 	public static final RegistryObject<Block> WAXED_OXI_COPPER_BULB = REGISTRY.register("waxed_copper_bulb_oxidized", () -> new WaxedBlockLight(BlockBehaviour.Properties.copy(CHISELED_COPPER.get()).lightLevel(checkLight(4))));
 	public static final RegistryObject<Block> SPAWNER = REGISTRY.register("trial_spawner", () -> new TrialSpawnerBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.NETHERITE_BLOCK).strength(200.0F, 2000.0F).requiresCorrectToolForDrops().noOcclusion()));
-	public static final RegistryObject<Block> VAULT = REGISTRY.register("trial_vault", () -> new TrialVaultBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.NETHERITE_BLOCK).strength(200.0F, 2000.0F).requiresCorrectToolForDrops().noOcclusion()));
+	public static final RegistryObject<Block> VAULT = REGISTRY.register("trial_vault", () -> new TrialVaultBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.NETHERITE_BLOCK).strength(200.0F, 2000.0F).requiresCorrectToolForDrops().noOcclusion(), false));
+	public static final RegistryObject<Block> VAULT_OMNI = REGISTRY.register("trial_vault_ominous", () -> new TrialVaultBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.NETHERITE_BLOCK).strength(200.0F, 2000.0F).requiresCorrectToolForDrops().noOcclusion(), true));
 	public static final RegistryObject<Block> HEAVY_CORE = REGISTRY.register("heavy_core", () -> new HeavyCoreBlock(BlockBehaviour.Properties.of().mapColor(MapColor.METAL).sound(SoundType.NETHERITE_BLOCK).strength(20.0F, 1000.0F).requiresCorrectToolForDrops().noOcclusion()));
 
 	private static ToIntFunction<BlockState> checkLight(int i) {

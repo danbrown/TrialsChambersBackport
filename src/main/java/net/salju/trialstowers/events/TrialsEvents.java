@@ -18,6 +18,7 @@ import net.minecraftforge.event.entity.living.MobEffectEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
+import net.minecraftforge.event.entity.EntityMobGriefingEvent;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.level.block.state.BlockState;
@@ -98,7 +99,7 @@ public class TrialsEvents {
 			int e = EnchantmentHelper.getItemEnchantmentLevel(TrialsEnchantments.WIND.get(), player.getMainHandItem());
 			if (e > 0) {
 				for (LivingEntity targets : target.level().getEntitiesOfClass(LivingEntity.class, target.getBoundingBox().inflate(5.76F))) {
-					if (targets.hasLineOfSight(target)) {
+					if (targets.hasLineOfSight(target) && targets.isAlive()) {
 						targets.fallDistance = 0.0F;
 						double d = target.distanceTo(targets) * 0.65;
 						if (targets == player) {
@@ -164,13 +165,24 @@ public class TrialsEvents {
 	}
 
 	@SubscribeEvent
+	public static void onGrief(EntityMobGriefingEvent event) {
+		if (event.getEntity() != null) {
+			if (event.getEntity() instanceof Silverfish && event.getEntity().getPersistentData().getInt("TrialSpawned") > 0) {
+				event.setResult(Result.DENY);
+			}
+		}
+	}
+
+	@SubscribeEvent
 	public static void onDeath(LivingDeathEvent event) {
 		if (event.getEntity() != null) {
 			LivingEntity target = event.getEntity();
 			if (target.level() instanceof ServerLevel lvl) {
-				TrialSpawnerEntity block = TrialsManager.getSpawner(target, target.blockPosition(), lvl, 64);
-				if (block != null) {
-					block.setRemainingEnemies(block.getRemainingEnemies() - 1);
+				if (target.getPersistentData().getInt("TrialSpawned") > 0) {
+					TrialSpawnerEntity block = TrialsManager.getSpawner(target, target.blockPosition(), lvl, 64);
+					if (block != null) {
+						block.setRemainingEnemies(block.getRemainingEnemies() - 1);
+					}
 				}
 				if (target instanceof Raider && target.getItemBySlot(EquipmentSlot.HEAD).getItem() == Items.WHITE_BANNER) {
 					Containers.dropItemStack(target.level(), target.getX(), target.getY(), target.getZ(), new ItemStack(TrialsItems.TRIAL_BOTTLE.get()));
@@ -178,7 +190,7 @@ public class TrialsEvents {
 				if (target.hasEffect(TrialsEffects.WINDED.get())) {
 					int e = (target.getEffect(TrialsEffects.WINDED.get()).getAmplifier() + 2);
 					for (LivingEntity targets : target.level().getEntitiesOfClass(LivingEntity.class, target.getBoundingBox().inflate(5.76F))) {
-						if (targets.hasLineOfSight(target)) {
+						if (targets.hasLineOfSight(target) && targets.isAlive()) {
 							targets.fallDistance = 0.0F;
 							double d = target.distanceTo(targets) * 0.65;
 							double y = (((double) Mth.nextInt(targets.level().getRandom(), 2, 3) * e) - d);

@@ -19,6 +19,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.BlockPos;
 
 public class TrialVaultEntity extends BlockEntity {
+	private boolean isOminous;
 	private int cd;
 
 	public TrialVaultEntity(BlockPos pos, BlockState state) {
@@ -29,12 +30,14 @@ public class TrialVaultEntity extends BlockEntity {
 	public void saveAdditional(CompoundTag tag) {
 		super.saveAdditional(tag);
 		tag.putInt("Cooldown", this.cd);
+		tag.putBoolean("Ominous", this.isOminous);
 	}
 
 	@Override
 	public void load(CompoundTag tag) {
 		super.load(tag);
 		this.cd = tag.getInt("Cooldown");
+		this.isOminous = tag.getBoolean("Ominous");
 	}
 
 	@Override
@@ -61,7 +64,7 @@ public class TrialVaultEntity extends BlockEntity {
 			target.updateBlock();
 			if (world instanceof ServerLevel lvl) {
 				if (block.isActive(state)) {
-					lvl.sendParticles(ParticleTypes.FLAME, (pos.getX() + 0.5), (pos.getY() + 0.5), (pos.getZ() + 0.5), 1, 0.12, 0.12, 0.12, 0);
+					lvl.sendParticles((target.isOminous() ? ParticleTypes.SOUL_FIRE_FLAME : ParticleTypes.FLAME), (pos.getX() + 0.5), (pos.getY() + 0.5), (pos.getZ() + 0.5), 1, 0.12, 0.12, 0.12, 0);
 					if (block.isEjecting(state)) {
 						if (target.getCd() == 1) {
 							world.setBlock(pos, state.setValue(TrialVaultBlock.EJECT, Boolean.valueOf(false)).setValue(TrialVaultBlock.ACTIVE, Boolean.valueOf(false)), 3);
@@ -73,7 +76,7 @@ public class TrialVaultEntity extends BlockEntity {
 							lvl.playSound(null, pos, TrialsModSounds.VAULT_OPEN.get(), SoundSource.BLOCKS, 1.0F, 1.0F);
 							for (int i = 0; i != e; ++i) {
 								TrialsMod.queueServerWork((20 * i), () -> {
-									for (ItemStack stack : TrialsManager.getLoot(target, world, "trials:gameplay/vault_loot")) {
+									for (ItemStack stack : TrialsManager.getLoot(target, world, target.getLootTable())) {
 										lvl.playSound(null, pos, TrialsModSounds.VAULT_EJECT.get(), SoundSource.BLOCKS, 1.0F, 1.0F);
 										Containers.dropItemStack(world, pos.getX(), (pos.getY() + 1.0), pos.getZ(), stack);
 									}
@@ -100,8 +103,20 @@ public class TrialVaultEntity extends BlockEntity {
 		return this.cd;
 	}
 
+	public boolean isOminous() {
+		return this.isOminous;
+	}
+
+	public String getLootTable() {
+		return (this.isOminous() ? "trials:gameplay/vault_special_loot" : "trials:gameplay/vault_loot");
+	}
+
 	public void setCd(int i) {
 		this.cd = i;
+	}
+
+	public void setVault(boolean check) {
+		this.isOminous = check;
 	}
 
 	public void updateBlock() {
@@ -109,4 +124,4 @@ public class TrialVaultEntity extends BlockEntity {
 		this.getLevel().updateNeighborsAt(this.getBlockPos(), this.getBlockState().getBlock());
 		this.getLevel().sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), 3);
 	}
-}
+}
