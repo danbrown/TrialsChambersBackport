@@ -52,13 +52,26 @@ public class WaxedBlockLight extends WaxedBlockBase {
 		super.tick(state, lvl, pos, rng);
 		if (state.getValue(POWERED) && !lvl.hasNeighborSignal(pos)) {
 			lvl.setBlock(pos, state.setValue(POWERED, false), 2);
+			lvl.updateNeighbourForOutputSignal(pos, state.getBlock());
 		} else if (lvl.hasNeighborSignal(pos) && !state.getValue(POWERED)) {
 			if (state.getValue(LIT)) {
 				lvl.setBlock(pos, state.setValue(LIT, false).setValue(POWERED, true), 2);
+				lvl.updateNeighbourForOutputSignal(pos, state.getBlock());
 			} else {
 				lvl.setBlock(pos, state.setValue(LIT, true).setValue(POWERED, true), 2);
+				lvl.updateNeighbourForOutputSignal(pos, state.getBlock());
 			}
 		}
+	}
+
+	@Override
+	public boolean hasAnalogOutputSignal(BlockState state) {
+		return state.getValue(LIT);
+	}
+
+	@Override
+	public int getAnalogOutputSignal(BlockState state, Level world, BlockPos pos) {
+		return (state.getValue(LIT) ? 15 : 0);
 	}
 
 	@Override

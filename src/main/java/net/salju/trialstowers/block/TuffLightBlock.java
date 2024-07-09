@@ -51,11 +51,14 @@ public class TuffLightBlock extends Block {
 		super.tick(state, lvl, pos, rng);
 		if (state.getValue(POWERED) && !lvl.hasNeighborSignal(pos)) {
 			lvl.setBlock(pos, state.setValue(POWERED, false), 2);
+			lvl.updateNeighbourForOutputSignal(pos, state.getBlock());
 		} else if (lvl.hasNeighborSignal(pos) && !state.getValue(POWERED)) {
 			if (state.getValue(LIT)) {
 				lvl.setBlock(pos, state.setValue(LIT, false).setValue(POWERED, true), 2);
+				lvl.updateNeighbourForOutputSignal(pos, state.getBlock());
 			} else {
 				lvl.setBlock(pos, state.setValue(LIT, true).setValue(POWERED, true), 2);
+				lvl.updateNeighbourForOutputSignal(pos, state.getBlock());
 			}
 		}
 	}
@@ -74,4 +77,4 @@ public class TuffLightBlock extends Block {
 	public int getLightBlock(BlockState state, BlockGetter world, BlockPos pos) {
 		return state.getValue(LIT) ? 15 : 0;
 	}
-}
+}
