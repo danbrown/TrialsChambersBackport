@@ -1,5 +1,6 @@
 package net.salju.trialstowers.events;
 
+import net.salju.trialstowers.init.TrialsTags;
 import net.salju.trialstowers.block.TrialSpawnerEntity;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
@@ -8,6 +9,9 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.entity.monster.Zombie;
+import net.minecraft.world.entity.monster.AbstractSkeleton;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.resources.ResourceLocation;
@@ -33,8 +37,10 @@ public class TrialsManager {
 				if (chunk != null) {
 					for (BlockPos poz : chunk.getBlockEntitiesPos()) {
 						if (world.getBlockEntity(poz) instanceof TrialSpawnerEntity target) {
-							if (entity.getType() == target.getSpawnType() && entity.getPersistentData().getInt("TrialSpawned") == target.getDifficulty() && target.getRemainingEnemies() != 0 && pos.closerThan(poz, radius)) {
-								return target;
+							if (target.getSpawnType() != null && entity.getPersistentData().getInt("TrialSpawned") == target.getDifficulty() && target.getRemainingEnemies() != 0 && pos.closerThan(poz, radius)) {
+								if (checkType(entity, target.getSpawnType())) {
+									return target;
+								}
 							}
 						}
 					}
@@ -42,5 +48,19 @@ public class TrialsManager {
 			}
 		}
 		return null;
+	}
+
+	public static boolean checkType(Entity entity, EntityType<?> type) {
+		if (entity.getType() == type) {
+			return true;
+		} else if (type == EntityType.HUSK || type == EntityType.ZOMBIE) {
+			return (entity instanceof Zombie);
+		} else if (type == EntityType.SKELETON) {
+			return (entity instanceof AbstractSkeleton);
+		} else if (type.is(TrialsTags.KOBOLDS)) {
+			return (entity.getType().is(TrialsTags.KOBOLDS));
+		} else {
+			return false;
+		}
 	}
 }

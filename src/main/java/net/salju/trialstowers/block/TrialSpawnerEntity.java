@@ -1,5 +1,6 @@
 package net.salju.trialstowers.block;
 
+import net.salju.trialstowers.init.TrialsTags;
 import net.salju.trialstowers.init.TrialsModSounds;
 import net.salju.trialstowers.init.TrialsItems;
 import net.salju.trialstowers.init.TrialsEffects;
@@ -20,7 +21,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.monster.ZombieVillager;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.monster.Vindicator;
 import net.minecraft.world.entity.monster.Vex;
@@ -141,16 +141,13 @@ public class TrialSpawnerEntity extends BlockEntity {
 					lvl.sendParticles(block.isCursed(state) ? ParticleTypes.SOUL_FIRE_FLAME : ParticleTypes.FLAME, (pos.getX() + 0.5), (pos.getY() + 0.5), (pos.getZ() + 0.5), 1, 0.12, 0.12, 0.12, 0);
 					if (target.isActivelySpawning()) {
 						if (target.getRemainingEnemies() != 0) {
-							checkPlayer(world, pos, state, target);
+							checkPlayer(lvl, pos, state, target);
 							if (target.getTotalEnemies() > 0) {
 								if (target.getCd() != 0) {
 									target.setCd(target.getCd() - 1);
 								} else if (target.getRemainingEnemies() == target.getTotalEnemies()) {
 									target.setCd(80);
 									int e = (target.getDifficulty() >= 101 ? 3 : 2);
-									if (e > target.getTotalEnemies()) {
-										e = target.getTotalEnemies();
-									}
 									target.setTotalEnemies(target.getTotalEnemies() - e);
 									lvl.playSound(null, pos, TrialsModSounds.SPAWNER_SUMMON.get(), SoundSource.BLOCKS, 1.0F, 1.0F);
 									for (int i = 0; i != e; ++i) {
@@ -181,15 +178,7 @@ public class TrialSpawnerEntity extends BlockEntity {
 					} else {
 						Player player = lvl.getNearestPlayer(pos.getX(), pos.getY(), pos.getZ(), 8, false);
 						if (player != null) {
-							boolean check = true;
-							for (BlockPos checkpos : BlockPos.betweenClosed(pos.above(), player.blockPosition().above(2))) {
-								BlockState checkstate = lvl.getBlockState(checkpos);
-								if (checkstate.canOcclude()) {
-									check = false;
-									break;
-								}
-							}
-							if (!player.isCreative() && !player.isSpectator() && check) {
+							if (!player.isCreative() && !player.isSpectator() && canSpawn(lvl, pos, player)) {
 								int i = 0;
 								if (player.hasEffect(MobEffects.BAD_OMEN)) {
 									player.addEffect(new MobEffectInstance(TrialsEffects.CURSED.get(), 12000, player.getEffect(MobEffects.BAD_OMEN).getAmplifier()));
@@ -236,18 +225,41 @@ public class TrialSpawnerEntity extends BlockEntity {
 		}
 	}
 
-	public static void checkPlayer(Level world, BlockPos pos, BlockState state, TrialSpawnerEntity target) {
-		if (world instanceof ServerLevel lvl) {
-			Player player = lvl.getNearestPlayer(pos.getX(), pos.getY(), pos.getZ(), 64, false);
-			if (player == null) {
-				target.setActivity(false);
-				target.setRemainingEnemies(0);
-				target.setTotalEnemies(0);
-				target.setCd(12000);
-				target.setDifficulty(Mth.nextInt(world.getRandom(), 2, 100));
-				world.setBlock(pos, state.setValue(TrialSpawnerBlock.ACTIVE, Boolean.valueOf(false)).setValue(TrialSpawnerBlock.CURSED, Boolean.valueOf(false)), 3);
+	public static boolean canSpawn(ServerLevel lvl, BlockPos pos, Player player) {
+		boolean check = true;
+		for (BlockPos checkpos : BlockPos.betweenClosed(pos.above(), player.blockPosition().above())) {
+			BlockState checkstate = lvl.getBlockState(checkpos);
+			if (checkstate.canOcclude()) {
+				check = false;
+				break;
 			}
 		}
+		return check;
+	}
+
+	public static void checkPlayer(ServerLevel lvl, BlockPos pos, BlockState state, TrialSpawnerEntity target) {
+		Player player = lvl.getNearestPlayer(pos.getX(), pos.getY(), pos.getZ(), 64, false);
+		if (player != null) {
+			int i = 0;
+			for (Player players : lvl.getPlayers(LivingEntity::isAlive)) {
+				if (players.isCloseEnough(player, 32) && !players.isCreative() && !players.isSpectator()) {
+					i++;
+				}
+			}
+			if (!player.isAlive() && i < 1) {
+				shutOff(lvl, pos, state, target);
+			}
+		} else {
+			shutOff(lvl, pos, state, target);
+		}
+	}
+
+	public static void shutOff(ServerLevel lvl, BlockPos pos, BlockState state, TrialSpawnerEntity target) {
+		target.setActivity(false);
+		target.setRemainingEnemies(0);
+		target.setTotalEnemies(0);
+		target.setCd(12000);
+		lvl.setBlock(pos, state.setValue(TrialSpawnerBlock.ACTIVE, Boolean.valueOf(false)).setValue(TrialSpawnerBlock.CURSED, Boolean.valueOf(false)), 3);
 	}
 
 	public static void setUpMob(Entity entity, ServerLevel lvl, int i, BlockPos pos) {
@@ -263,7 +275,7 @@ public class TrialSpawnerEntity extends BlockEntity {
 			target.setDropChance(EquipmentSlot.CHEST, 0.0F);
 			target.setDropChance(EquipmentSlot.LEGS, 0.0F);
 			target.setDropChance(EquipmentSlot.FEET, 0.0F);
-			if (canWearArmor(target) && i > 65) {
+			if (target.getType().is(TrialsTags.ARMORABLE) && i > 65) {
 				if (LocalDate.now().get(ChronoField.DAY_OF_MONTH) == 31 && LocalDate.now().get(ChronoField.MONTH_OF_YEAR) == 10) {
 					target.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Math.random() <= 0.1 ? Blocks.JACK_O_LANTERN : Blocks.CARVED_PUMPKIN));
 				} else if (Math.random() >= 0.25) {
@@ -353,10 +365,6 @@ public class TrialSpawnerEntity extends BlockEntity {
 			}
 		}
 		lvl.addFreshEntity(entity);
-	}
-
-	public static boolean canWearArmor(Entity target) {
-		return (target instanceof Zombie || target instanceof AbstractSkeleton);
 	}
 
 	public static Holder.Reference<TrimMaterial> getTrim(ServerLevel lvl) {

@@ -16,9 +16,12 @@ import net.minecraftforge.event.village.VillagerTradesEvent;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
 import net.minecraftforge.event.entity.living.MobEffectEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
+import net.minecraftforge.event.entity.living.LivingConversionEvent;
 import net.minecraftforge.event.entity.EntityMobGriefingEvent;
+import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.level.block.state.BlockState;
@@ -31,7 +34,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.npc.VillagerProfession;
+import net.minecraft.world.entity.monster.Stray;
 import net.minecraft.world.entity.monster.Slime;
+import net.minecraft.world.entity.monster.Skeleton;
 import net.minecraft.world.entity.monster.Silverfish;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -165,10 +170,43 @@ public class TrialsEvents {
 	}
 
 	@SubscribeEvent
+	public static void onEntityTick(LivingEvent.LivingTickEvent event) {
+		if (event.getEntity() instanceof Skeleton kevin && event.getEntity().getPersistentData().getInt("TrialSpawned") > 0 && !event.getEntity().getPersistentData().getBoolean("TrialFreezing")) {
+			if (kevin.isShaking()) {
+				event.getEntity().getPersistentData().putBoolean("TrialFreezing", true);
+				TrialsMod.queueServerWork(150, () -> {
+					if (kevin != null && kevin.isAlive()) {
+						if (kevin.isShaking()) {
+							Stray frosty = kevin.convertTo(EntityType.STRAY, true);
+							if (!kevin.isSilent()) {
+								kevin.level().levelEvent(null, 1048, kevin.blockPosition(), 0);
+							}
+							if (frosty != null) {
+								ForgeEventFactory.onLivingConvert(kevin, frosty);
+							}
+						} else {
+							event.getEntity().getPersistentData().remove("TrialFreezing");
+						}
+					}
+				});
+			}
+		}
+	}
+
+	@SubscribeEvent
 	public static void onGrief(EntityMobGriefingEvent event) {
 		if (event.getEntity() != null) {
 			if (event.getEntity() instanceof Silverfish && event.getEntity().getPersistentData().getInt("TrialSpawned") > 0) {
 				event.setResult(Result.DENY);
+			}
+		}
+	}
+
+	@SubscribeEvent
+	public static void onConvert(LivingConversionEvent.Post event) {
+		if (event.getEntity() != null && event.getOutcome() != null) {
+			if (event.getEntity().getPersistentData().getInt("TrialSpawned") > 0) {
+				event.getOutcome().getPersistentData().putInt("TrialSpawned", event.getEntity().getPersistentData().getInt("TrialSpawned"));
 			}
 		}
 	}

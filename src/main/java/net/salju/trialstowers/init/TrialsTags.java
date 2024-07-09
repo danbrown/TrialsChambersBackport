@@ -6,5 +6,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.registries.Registries;
 
 public class TrialsTags {
-	public static TagKey<Structure> TRIALS_MAPS = TagKey.create(Registries.STRUCTURE, new ResourceLocation("trials:on_trials_maps"));
+	public static final TagKey<Structure> TRIALS_MAPS = TagKey.create(Registries.STRUCTURE, new ResourceLocation("trials:on_trials_maps"));
+	public static final TagKey KOBOLDS = TagKey.create(Registries.ENTITY_TYPE, new ResourceLocation("kobolds:kobolds"));
+	public static final TagKey ARMORABLE = TagKey.create(Registries.ENTITY_TYPE, new ResourceLocation("trials:armorable"));
 }
