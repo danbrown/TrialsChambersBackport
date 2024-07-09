@@ -101,10 +101,9 @@
             {
               "function": "minecraft:enchant_randomly",
               "enchantments": [
-                "minecraft:mending",
-                "minecraft:frost_walker",
-                "minecraft:binding_curse",
-                "minecraft:vanishing_curse"
+                "trials:density",
+                "trials:breach",
+                "trials:wind_burst"
               ]
             }
           ]
@@ -130,17 +129,27 @@
         },
         {
           "type": "minecraft:item",
-          "name": "trials:bolt_template",
-          "weight": 2
-        },
-        {
-          "type": "minecraft:loot_table",
-          "name": "trials:gameplay/iron",
+          "name": "trials:flow_template",
           "weight": 2
         },
         {
           "type": "minecraft:item",
-          "name": "trials:music_disc_precipice",
+          "name": "trials:music_disc_creator",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:loot_table",
+          "name": "trials:gameplay/diamond_armor",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:trident",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "trials:heavy_core",
           "weight": 1
         }
       ]

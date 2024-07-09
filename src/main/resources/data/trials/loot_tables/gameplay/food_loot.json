@@ -64,16 +64,6 @@
               "id": "minecraft:swiftness"
             }
           ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "trials:banner_pattern_flow",
-          "weight": 1
-        },
-        {
-          "type": "minecraft:item",
-          "name": "trials:banner_pattern_guster",
-          "weight": 1
         }
       ]
     }
