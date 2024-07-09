@@ -7,27 +7,13 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:emerald",
-          "weight": 12,
+          "weight": 21,
           "functions": [
             {
               "function": "set_count",
               "count": {
                 "min": 2,
-                "max": 4
-              }
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:arrow",
-          "weight": 8,
-          "functions": [
-            {
-              "function": "set_count",
-              "count": {
-                "min": 2,
-                "max": 8
+                "max": 6
               }
             }
           ]
@@ -35,7 +21,7 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:golden_carrot",
-          "weight": 8,
+          "weight": 16,
           "functions": [
             {
               "function": "set_count",
@@ -49,7 +35,7 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:iron_ingot",
-          "weight": 8,
+          "weight": 12,
           "functions": [
             {
               "function": "set_count",
@@ -63,7 +49,7 @@
         {
           "type": "minecraft:item",
           "name": "trials:breeze_rod",
-          "weight": 6,
+          "weight": 8,
           "functions": [
             {
               "function": "set_count",
@@ -77,7 +63,7 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:ender_pearl",
-          "weight": 6,
+          "weight": 8,
           "functions": [
             {
               "function": "set_count",
@@ -91,12 +77,12 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:golden_apple",
-          "weight": 6
+          "weight": 8
         },
 	{
           "type": "minecraft:item",
           "name": "minecraft:book",
-          "weight": 4,
+          "weight": 6,
           "functions": [
             {
               "function": "minecraft:enchant_randomly",
@@ -112,12 +98,12 @@
         {
           "type": "minecraft:item",
           "name": "trials:ominous_bottle",
-          "weight": 4
+          "weight": 6
         },
         {
           "type": "minecraft:item",
           "name": "minecraft:diamond",
-          "weight": 2,
+          "weight": 4,
           "functions": [
             {
               "function": "set_count",
@@ -131,7 +117,7 @@
         {
           "type": "minecraft:item",
           "name": "trials:bolt_template",
-          "weight": 2
+          "weight": 4
         },
         {
           "type": "minecraft:loot_table",
@@ -141,7 +127,7 @@
         {
           "type": "minecraft:item",
           "name": "trials:music_disc_precipice",
-          "weight": 1
+          "weight": 2
         }
       ]
     }
