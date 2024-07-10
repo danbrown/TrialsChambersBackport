@@ -7,14 +7,14 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:diamond_helmet",
-          "weight": 2,
+          "weight": 12,
 	  "functions": [
             {
               "function": "enchant_with_levels",
-              "treasure": false,
+              "treasure": true,
               "levels": {
-                "min": 21,
-                "max": 34
+                "min": 10,
+                "max": 20
               }
             }
           ]
@@ -22,14 +22,14 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:diamond_chestplate",
-          "weight": 2,
+          "weight": 12,
 	  "functions": [
             {
               "function": "enchant_with_levels",
-              "treasure": false,
+              "treasure": true,
               "levels": {
-                "min": 21,
-                "max": 34
+                "min": 10,
+                "max": 20
               }
             }
           ]
@@ -37,14 +37,14 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:diamond_leggings",
-          "weight": 2,
+          "weight": 12,
 	  "functions": [
             {
               "function": "enchant_with_levels",
-              "treasure": false,
+              "treasure": true,
               "levels": {
-                "min": 21,
-                "max": 34
+                "min": 10,
+                "max": 20
               }
             }
           ]
@@ -52,17 +52,52 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:diamond_boots",
-          "weight": 2,
+          "weight": 12,
 	  "functions": [
             {
               "function": "enchant_with_levels",
-              "treasure": false,
+              "treasure": true,
               "levels": {
-                "min": 21,
-                "max": 34
+                "min": 10,
+                "max": 20
               }
             }
           ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:crossbow",
+          "weight": 8,
+	  "functions": [
+            {
+              "function": "enchant_with_levels",
+              "treasure": true,
+              "levels": {
+                "min": 10,
+                "max": 20
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:diamond_axe",
+          "weight": 8,
+	  "functions": [
+            {
+              "function": "enchant_with_levels",
+              "treasure": true,
+              "levels": {
+                "min": 10,
+                "max": 20
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "trials:heavy_core",
+          "weight": 2
         }
       ]
     }

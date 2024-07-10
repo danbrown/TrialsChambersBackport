@@ -11,10 +11,10 @@
 	  "functions": [
             {
               "function": "enchant_with_levels",
-              "treasure": false,
+              "treasure": true,
               "levels": {
-                "min": 21,
-                "max": 34
+                "min": 10,
+                "max": 20
               }
             }
           ]
@@ -26,10 +26,10 @@
 	  "functions": [
             {
               "function": "enchant_with_levels",
-              "treasure": false,
+              "treasure": true,
               "levels": {
-                "min": 21,
-                "max": 34
+                "min": 10,
+                "max": 20
               }
             }
           ]
@@ -41,10 +41,10 @@
 	  "functions": [
             {
               "function": "enchant_with_levels",
-              "treasure": false,
+              "treasure": true,
               "levels": {
-                "min": 21,
-                "max": 34
+                "min": 10,
+                "max": 20
               }
             }
           ]
@@ -56,13 +56,63 @@
 	  "functions": [
             {
               "function": "enchant_with_levels",
-              "treasure": false,
+              "treasure": true,
               "levels": {
-                "min": 21,
-                "max": 34
+                "min": 10,
+                "max": 20
               }
             }
           ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:crossbow",
+          "weight": 8,
+	  "functions": [
+            {
+              "function": "enchant_with_levels",
+              "treasure": true,
+              "levels": {
+                "min": 10,
+                "max": 20
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:bow",
+          "weight": 8,
+	  "functions": [
+            {
+              "function": "enchant_with_levels",
+              "treasure": true,
+              "levels": {
+                "min": 10,
+                "max": 20
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:iron_axe",
+          "weight": 8,
+	  "functions": [
+            {
+              "function": "enchant_with_levels",
+              "treasure": true,
+              "levels": {
+                "min": 10,
+                "max": 20
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:trident",
+          "weight": 2
         }
       ]
     }

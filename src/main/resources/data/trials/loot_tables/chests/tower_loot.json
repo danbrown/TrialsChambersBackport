@@ -34,6 +34,20 @@
         },
         {
           "type": "minecraft:item",
+          "name": "minecraft:baked_potato",
+          "weight": 12,
+          "functions": [
+            {
+              "function": "set_count",
+              "count": {
+                "min": 2,
+                "max": 4
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
           "name": "minecraft:amethyst_shard",
           "weight": 12,
           "functions": [
@@ -189,6 +203,11 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:compass",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:cake",
           "weight": 2
         },
         {
