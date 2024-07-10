@@ -7,15 +7,22 @@ import net.salju.trialstowers.TrialsMod;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.LeverBlock;
+import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.ButtonBlock;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.AbstractCandleBlock;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.util.Mth;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.core.particles.ParticleTypes;
@@ -76,11 +83,21 @@ public class WindCharge extends ThrowableProjectile {
 
 	public void explodeWind() {
 		if (this.level() instanceof ServerLevel lvl) {
-			for (LivingEntity target : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(5.76F))) {
+			for (LivingEntity target : this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox().inflate(4.76F))) {
 				if (target.hasLineOfSight(this) && target.isAlive()) {
 					target.fallDistance = 0.0F;
 					double d = this.distanceTo(target) * 0.65;
 					double y = (((double) Mth.nextInt(target.level().getRandom(), 2, 3) * (target.isCrouching() ? 4 : 2)) - d);
+					if (this.getOwner() != null) {
+						if (target == this.getOwner()) {
+							if (target.getPersistentData().contains("FallDamageImmunity") && target.getPersistentData().getDouble("FallDamageImmunity") > target.getY()) {
+								target.getPersistentData().remove("FallDamageImmunity");
+								target.getPersistentData().putDouble("FallDamageImmunity", target.blockPosition().below().getY());
+							} else if (!target.getPersistentData().contains("FallDamageImmunity")) {
+								target.getPersistentData().putDouble("FallDamageImmunity", target.blockPosition().below().getY());
+							}
+						}
+					}
 					if (target instanceof ServerPlayer ply) {
 						TrialsMod.sendToClientPlayer(new ApplyKnockback(y), ply);
 					} else if (target.getDeltaMovement().y() <= 5.0) {
@@ -96,6 +113,16 @@ public class WindCharge extends ThrowableProjectile {
 					blok.pull(state, this.level(), pos);
 				} else if (state.getBlock() instanceof ButtonBlock blok) {
 					blok.press(state, this.level(), pos);
+				} else if (state.getBlock() instanceof AbstractCandleBlock blok) {
+					blok.extinguish(null, state, lvl, pos);
+				} else if (state.getBlock() instanceof TrapDoorBlock && state.getBlock() != Blocks.IRON_TRAPDOOR) {
+					lvl.setBlock(pos, state.cycle(TrapDoorBlock.OPEN), 2);
+					lvl.playSound(null, pos, state.getValue(TrapDoorBlock.OPEN) ? SoundEvents.WOODEN_TRAPDOOR_CLOSE : SoundEvents.WOODEN_TRAPDOOR_OPEN, SoundSource.BLOCKS, 1.0F, lvl.getRandom().nextFloat() * 0.1F + 0.9F);
+					lvl.gameEvent(null, state.getValue(TrapDoorBlock.OPEN) ? GameEvent.BLOCK_CLOSE : GameEvent.BLOCK_OPEN, pos);
+				} else if (state.getBlock() instanceof DoorBlock && state.getValue(DoorBlock.HALF) == DoubleBlockHalf.LOWER && state.getBlock() != Blocks.IRON_DOOR) {
+					lvl.setBlock(pos, state.cycle(DoorBlock.OPEN), 10);
+					lvl.playSound(null, pos, state.getValue(DoorBlock.OPEN) ? SoundEvents.WOODEN_DOOR_CLOSE : SoundEvents.WOODEN_DOOR_OPEN, SoundSource.BLOCKS, 1.0F, lvl.getRandom().nextFloat() * 0.1F + 0.9F);
+					lvl.gameEvent(null, state.getValue(DoorBlock.OPEN) ? GameEvent.BLOCK_CLOSE : GameEvent.BLOCK_OPEN, pos);
 				}
 			}
 			lvl.sendParticles(ParticleTypes.CLOUD, this.getX(), this.getY(), this.getZ(), 8, 1.5, 0.15, 1.5, 0);
@@ -104,4 +131,4 @@ public class WindCharge extends ThrowableProjectile {
 		}
 		this.discard();
 	}
-}
+}

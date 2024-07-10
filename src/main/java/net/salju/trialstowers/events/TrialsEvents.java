@@ -9,7 +9,8 @@ import net.salju.trialstowers.init.TrialsEnchantments;
 import net.salju.trialstowers.init.TrialsEffects;
 import net.salju.trialstowers.block.TrialSpawnerEntity;
 import net.salju.trialstowers.TrialsMod;
-import net.minecraftforge.fml.common.Mod;
+
+import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.eventbus.api.Event.Result;
 import net.minecraftforge.event.village.VillagerTradesEvent;
@@ -22,12 +23,18 @@ import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingConversionEvent;
 import net.minecraftforge.event.entity.EntityMobGriefingEvent;
 import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraft.world.phys.Vec3;
+
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.LeverBlock;
+import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.ButtonBlock;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.AbstractCandleBlock;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ItemStack;
@@ -43,9 +50,11 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.Containers;
 import net.minecraft.util.Mth;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.core.particles.ParticleTypes;
@@ -58,6 +67,12 @@ public class TrialsEvents {
 		if (event.getEntity() != null) {
 			LivingEntity target = event.getEntity();
 			if (target.level() instanceof ServerLevel lvl) {
+				if (target.getPersistentData().contains("FallDamageImmunity") && event.getSource().is(DamageTypes.FALL)) {
+					if (target.getY() >= target.getPersistentData().getDouble("FallDamageImmunity")) {
+						target.getPersistentData().remove("FallDamageImmunity");
+						event.setAmount(0.0F);
+					}
+				}
 				if (target.hasEffect(TrialsEffects.INFESTED.get()) && Mth.nextInt(target.level().getRandom(), 1, 10) == 10) {
 					int e = (Mth.nextInt(target.level().getRandom(), 1, 3) * (target.getEffect(TrialsEffects.INFESTED.get()).getAmplifier() + 1));
 					for (int i = 0; i != e; ++i) {
@@ -103,12 +118,18 @@ public class TrialsEvents {
 		if (event.isVanillaCritical() && player.getMainHandItem().getItem() instanceof MaceItem && player.level() instanceof ServerLevel lvl) {
 			int e = EnchantmentHelper.getItemEnchantmentLevel(TrialsEnchantments.WIND.get(), player.getMainHandItem());
 			if (e > 0) {
-				for (LivingEntity targets : target.level().getEntitiesOfClass(LivingEntity.class, target.getBoundingBox().inflate(5.76F))) {
+				for (LivingEntity targets : target.level().getEntitiesOfClass(LivingEntity.class, target.getBoundingBox().inflate(4.76F))) {
 					if (targets.hasLineOfSight(target) && targets.isAlive()) {
 						targets.fallDistance = 0.0F;
 						double d = target.distanceTo(targets) * 0.65;
 						if (targets == player) {
 							d = 0;
+							if (targets.getPersistentData().contains("FallDamageImmunity") && targets.getPersistentData().getDouble("FallDamageImmunity") > targets.getY()) {
+								targets.getPersistentData().remove("FallDamageImmunity");
+								targets.getPersistentData().putDouble("FallDamageImmunity", targets.blockPosition().below().getY());
+							} else if (!targets.getPersistentData().contains("FallDamageImmunity")) {
+								targets.getPersistentData().putDouble("FallDamageImmunity", targets.blockPosition().below().getY());
+							}
 						}
 						double y = (((double) Mth.nextInt(targets.level().getRandom(), 2, 3) * e) - d);
 						if (targets instanceof ServerPlayer ply) {
@@ -126,6 +147,16 @@ public class TrialsEvents {
 						blok.pull(state, target.level(), pos);
 					} else if (state.getBlock() instanceof ButtonBlock blok) {
 						blok.press(state, target.level(), pos);
+					} else if (state.getBlock() instanceof AbstractCandleBlock blok) {
+						blok.extinguish(null, state, lvl, pos);
+					} else if (state.getBlock() instanceof TrapDoorBlock && state.getBlock() != Blocks.IRON_TRAPDOOR) {
+						lvl.setBlock(pos, state.cycle(TrapDoorBlock.OPEN), 2);
+						lvl.playSound(null, pos, state.getValue(TrapDoorBlock.OPEN) ? SoundEvents.WOODEN_TRAPDOOR_CLOSE : SoundEvents.WOODEN_TRAPDOOR_OPEN, SoundSource.BLOCKS, 1.0F, lvl.getRandom().nextFloat() * 0.1F + 0.9F);
+						lvl.gameEvent(null, state.getValue(TrapDoorBlock.OPEN) ? GameEvent.BLOCK_CLOSE : GameEvent.BLOCK_OPEN, pos);
+					} else if (state.getBlock() instanceof DoorBlock && state.getValue(DoorBlock.HALF) == DoubleBlockHalf.LOWER && state.getBlock() != Blocks.IRON_DOOR) {
+						lvl.setBlock(pos, state.cycle(DoorBlock.OPEN), 10);
+						lvl.playSound(null, pos, state.getValue(DoorBlock.OPEN) ? SoundEvents.WOODEN_DOOR_CLOSE : SoundEvents.WOODEN_DOOR_OPEN, SoundSource.BLOCKS, 1.0F, lvl.getRandom().nextFloat() * 0.1F + 0.9F);
+						lvl.gameEvent(null, state.getValue(DoorBlock.OPEN) ? GameEvent.BLOCK_CLOSE : GameEvent.BLOCK_OPEN, pos);
 					}
 				}
 				lvl.sendParticles(ParticleTypes.CLOUD, target.getX(), target.getY(), target.getZ(), 8, 1.5, 0.15, 1.5, 0);
@@ -171,6 +202,9 @@ public class TrialsEvents {
 
 	@SubscribeEvent
 	public static void onEntityTick(LivingEvent.LivingTickEvent event) {
+		if (event.getEntity().getPersistentData().contains("FallDamageImmunity") && event.getEntity().onGround()) {
+			event.getEntity().getPersistentData().remove("FallDamageImmunity");
+		}
 		if (event.getEntity() instanceof Skeleton kevin && event.getEntity().getPersistentData().getInt("TrialSpawned") > 0 && !event.getEntity().getPersistentData().getBoolean("TrialFreezing")) {
 			if (kevin.isShaking()) {
 				event.getEntity().getPersistentData().putBoolean("TrialFreezing", true);
@@ -247,6 +281,16 @@ public class TrialsEvents {
 							blok.pull(state, target.level(), pos);
 						} else if (state.getBlock() instanceof ButtonBlock blok) {
 							blok.press(state, target.level(), pos);
+						} else if (state.getBlock() instanceof AbstractCandleBlock blok) {
+							blok.extinguish(null, state, lvl, pos);
+						} else if (state.getBlock() instanceof TrapDoorBlock && state.getBlock() != Blocks.IRON_TRAPDOOR) {
+							lvl.setBlock(pos, state.cycle(TrapDoorBlock.OPEN), 2);
+							lvl.playSound(null, pos, state.getValue(TrapDoorBlock.OPEN) ? SoundEvents.WOODEN_TRAPDOOR_CLOSE : SoundEvents.WOODEN_TRAPDOOR_OPEN, SoundSource.BLOCKS, 1.0F, lvl.getRandom().nextFloat() * 0.1F + 0.9F);
+							lvl.gameEvent(null, state.getValue(TrapDoorBlock.OPEN) ? GameEvent.BLOCK_CLOSE : GameEvent.BLOCK_OPEN, pos);
+						} else if (state.getBlock() instanceof DoorBlock && state.getValue(DoorBlock.HALF) == DoubleBlockHalf.LOWER && state.getBlock() != Blocks.IRON_DOOR) {
+							lvl.setBlock(pos, state.cycle(DoorBlock.OPEN), 10);
+							lvl.playSound(null, pos, state.getValue(DoorBlock.OPEN) ? SoundEvents.WOODEN_DOOR_CLOSE : SoundEvents.WOODEN_DOOR_OPEN, SoundSource.BLOCKS, 1.0F, lvl.getRandom().nextFloat() * 0.1F + 0.9F);
+							lvl.gameEvent(null, state.getValue(DoorBlock.OPEN) ? GameEvent.BLOCK_CLOSE : GameEvent.BLOCK_OPEN, pos);
 						}
 					}
 					lvl.sendParticles(ParticleTypes.CLOUD, target.getX(), target.getY(), target.getZ(), 8, 1.5, 0.15, 1.5, 0);
@@ -265,4 +309,4 @@ public class TrialsEvents {
 			}
 		}
 	}
-}
+}
