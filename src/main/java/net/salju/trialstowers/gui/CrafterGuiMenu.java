@@ -26,7 +26,7 @@ public class CrafterGuiMenu extends AbstractContainerMenu {
 		this.addSlot(new CrafterResultSlot(con, 9, 124, 35));
 		for (int i = 0; i < 3; ++i) {
 			for (int j = 0; j < 3; ++j) {
-				this.addSlot(new Slot(con, j + i * 3, 30 + j * 18, 17 + i * 18));
+				this.addSlot(new CrafterSlot(con, j + i * 3, 30 + j * 18, 17 + i * 18));
 			}
 		}
 		for (int k = 0; k < 3; ++k) {

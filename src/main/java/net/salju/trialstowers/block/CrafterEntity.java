@@ -30,7 +30,7 @@ import net.minecraft.core.BlockPos;
 import java.util.List;
 
 public class CrafterEntity extends BaseContainerBlockEntity implements CraftingContainer {
-	private NonNullList<ItemStack> stacks = NonNullList.<ItemStack>withSize(10, ItemStack.EMPTY);
+	public NonNullList<ItemStack> stacks = NonNullList.<ItemStack>withSize(10, ItemStack.EMPTY);
 
 	public CrafterEntity(BlockPos pos, BlockState state) {
 		super(TrialsBlockEntities.CRAFTER.get(), pos, state);
@@ -114,19 +114,19 @@ public class CrafterEntity extends BaseContainerBlockEntity implements CraftingC
 
 	@Override
 	public boolean canPlaceItem(int i, ItemStack stack) {
-		int c = 0;
+		int c = 64;
 		for (int e = 0; e < 9; ++e) {
 			if (this.getItem(e).isEmpty() && !this.isLocked()) {
 				i = e;
 				break;
 			} else if (this.getItem(e).getItem() == stack.getItem()) {
-				if (this.getItem(e).getCount() <= 1) {
+				if (this.getItem(e).getCount() == this.getItem(e).getMaxStackSize()) {
+					continue;
+				} else if (this.getItem(e).getCount() <= 1) {
 					i = e;
 					break;
 				} else if (this.getItem(e).getCount() < c) {
 					i = e;
-					c = this.getItem(e).getCount();
-				} else if (c == 0) {
 					c = this.getItem(e).getCount();
 				}
 			}
@@ -140,11 +140,6 @@ public class CrafterEntity extends BaseContainerBlockEntity implements CraftingC
 			this.getItem(i).setCount(this.getItem(i).getCount() + 1);
 			stack.shrink(1);
 		}
-		return false;
-	}
-
-	@Override
-	public boolean canTakeItem(Container con, int i, ItemStack stack) {
 		return false;
 	}
 
@@ -237,12 +232,11 @@ public class CrafterEntity extends BaseContainerBlockEntity implements CraftingC
 			lvl.sendParticles(ParticleTypes.SMOKE, x, y, z, 6, 0.12, 0.12, 0.12, 0);
 		}
 		Containers.dropItemStack(this.getLevel(), x, y, z, this.getResultItem());
-		this.craftedItem();
-	}
-
-	public void craftedItem() {
 		for (ItemStack stack : this.stacks) {
 			if (!stack.isEmpty()) {
+				if (stack.hasCraftingRemainingItem()) {
+					Containers.dropItemStack(this.getLevel(), x, y, z, stack.getCraftingRemainingItem());
+				}
 				stack.shrink(1);
 			}
 		}
