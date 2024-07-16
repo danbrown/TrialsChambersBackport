@@ -35,20 +35,21 @@ public class TrialsTabs {
 				tabData.accept(TrialsItems.FLOW_TEMPLATE.get());
 				tabData.accept(TrialsItems.BANNER_PATTERN_FLOW.get());
 				tabData.accept(TrialsItems.BANNER_PATTERN_GUSTER.get());
+				tabData.accept(TrialsBlocks.CRAFTER.get().asItem());
+				tabData.accept(TrialsBlocks.HEAVY_CORE.get().asItem());
+				tabData.accept(TrialsItems.BREEZE_ROD.get());
+				tabData.accept(TrialsItems.MACE.get());
 				tabData.accept(TrialsItems.WIND_CHARGE.get());
-				tabData.accept(TrialsItems.BOGGED_SPAWN_EGG.get());
-				tabData.accept(TrialsItems.TRIAL_BOTTLE.get());
-				tabData.accept(TrialsItems.TRIAL_KEY.get());
-				tabData.accept(TrialsItems.TRIAL_KEY_OMNI.get());
 				tabData.accept(TrialsItems.FLOW_SHERD.get());
 				tabData.accept(TrialsItems.GUSTER_SHERD.get());
 				tabData.accept(TrialsItems.SCRAPE_SHERD.get());
 				tabData.accept(TrialsItems.MUSIC_DISC_CREATOR_BOX.get());
 				tabData.accept(TrialsItems.MUSIC_DISC_PRECIPICE.get());
 				tabData.accept(TrialsItems.MUSIC_DISC_CREATOR.get());
-				tabData.accept(TrialsBlocks.HEAVY_CORE.get().asItem());
-				tabData.accept(TrialsItems.BREEZE_ROD.get());
-				tabData.accept(TrialsItems.MACE.get());
+				tabData.accept(TrialsItems.TRIAL_BOTTLE.get());
+				tabData.accept(TrialsItems.TRIAL_KEY.get());
+				tabData.accept(TrialsItems.TRIAL_KEY_OMNI.get());
+				tabData.accept(TrialsItems.BOGGED_SPAWN_EGG.get());
 			}).build());
 			
 	public static final RegistryObject<CreativeModeTab> COPPER = REGISTRY.register("copper",

@@ -73,6 +73,7 @@ public class TrialsItems {
 	public static final RegistryObject<Item> WAXED_EX_COPPER_BULB = block(TrialsBlocks.WAXED_EX_COPPER_BULB);
 	public static final RegistryObject<Item> WAXED_W_COPPER_BULB = block(TrialsBlocks.WAXED_W_COPPER_BULB);
 	public static final RegistryObject<Item> WAXED_OXI_COPPER_BULB = block(TrialsBlocks.WAXED_OXI_COPPER_BULB);
+	public static final RegistryObject<Item> CRAFTER = block(TrialsBlocks.CRAFTER);
 	public static final RegistryObject<Item> SPAWNER = block(TrialsBlocks.SPAWNER);
 	public static final RegistryObject<Item> VAULT = block(TrialsBlocks.VAULT);
 	public static final RegistryObject<Item> VAULT_OMNI = block(TrialsBlocks.VAULT_OMNI);
