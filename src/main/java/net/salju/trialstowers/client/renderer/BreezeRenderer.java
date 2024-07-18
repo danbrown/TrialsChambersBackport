@@ -18,6 +18,11 @@ public class BreezeRenderer extends MobRenderer<Breeze, BreezeModel<Breeze>> {
 	}
 
 	@Override
+	protected int getBlockLightLevel(Breeze brezo, BlockPos pos) {
+		return 15;
+	}
+
+	@Override
 	public ResourceLocation getTextureLocation(Breeze brezo) {
 		return new ResourceLocation("trials:textures/entity/breeze.png");
 	}

@@ -406,7 +406,7 @@ public class TrialSpawnerEntity extends BlockEntity {
 				break;
 			}
 		}
-		return pos;
+		return BlockPos.containing(pos.getX() + 0.5, pos.getY() + 0.25, pos.getZ() + 0.5);
 	}
 
 	public void setEgg(ItemStack stack) {

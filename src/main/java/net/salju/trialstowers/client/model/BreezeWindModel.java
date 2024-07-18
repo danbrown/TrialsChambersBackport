@@ -38,7 +38,7 @@ public class BreezeWindModel<T extends Breeze> extends EntityModel<T> {
 		int e = (int) (1 * 360f);
 		float f = (Math.floorMod(brezo.level().getGameTime(), (long) e) + ageInTicks) / (float) e;
 		this.top.yRot = ((float) (f * Math.PI * 25));
-		this.middle.yRot = ((float) (f * Math.PI * -25));
+		this.middle.yRot = ((float) (f * Math.PI * 25));
 		this.bottom.yRot = ((float) (f * Math.PI * 25));
 		float fml = ageInTicks * (float) Math.PI * -0.07F;
 		this.top.x = Mth.cos(fml) * 1.0F;

@@ -43,6 +43,9 @@ public class BreezeAttackGoal extends Goal {
 				this.lastSeen = 0;
 			} else {
 				++this.lastSeen;
+				if (this.brezo.isCharging()) {
+					this.brezo.setCharged(false);
+				}
 			}
 			if (this.brezo.distanceToSqr(target) < this.getFollowDistance() * this.getFollowDistance() && this.brezo.getSensing().hasLineOfSight(target)) {
 				if (this.attackTime <= 0) {

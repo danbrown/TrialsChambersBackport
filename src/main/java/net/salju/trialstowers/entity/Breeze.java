@@ -28,6 +28,7 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.core.BlockPos;
+import javax.annotation.Nullable;
 
 public class Breeze extends Monster {
 	private static final EntityDataAccessor<Boolean> CHARGE = SynchedEntityData.defineId(Breeze.class, EntityDataSerializers.BOOLEAN);
@@ -134,8 +135,9 @@ public class Breeze extends Monster {
 		//
 	}
 
+	@Nullable
 	public BlockPos findPositionNear(int range) {
-		BlockPos pos = this.blockPosition();
+		BlockPos pos = null;
 		for (int i = 0; i < 25; ++i) {
 			int x = this.blockPosition().getX() + this.getRandom().nextInt(range * 2) - range;
 			int y = this.blockPosition().getY() + this.getRandom().nextInt(range * 2) - range;
@@ -146,7 +148,10 @@ public class Breeze extends Monster {
 				break;
 			}
 		}
-		return pos;
+		if (pos != null) {
+			return BlockPos.containing(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
+		}
+		return null;
 	}
 
 	public boolean canMoveTo(BlockPos pos) {
