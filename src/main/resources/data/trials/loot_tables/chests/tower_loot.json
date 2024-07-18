@@ -2,7 +2,7 @@
   "type": "minecraft:generic",
   "pools": [
     {
-      "rolls": 12,
+      "rolls": 9,
       "entries": [
         {
           "type": "minecraft:item",
@@ -154,20 +154,6 @@
               "count": {
                 "min": 1,
                 "max": 4
-              }
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "trials:breeze_rod",
-          "weight": 6,
-          "functions": [
-            {
-              "function": "set_count",
-              "count": {
-                "min": 1,
-                "max": 2
               }
             }
           ]
