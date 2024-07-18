@@ -6,8 +6,13 @@
       "entries": [
         {
           "type": "minecraft:item",
+          "name": "trials:heavy_core",
+          "weight": 4
+        },
+        {
+          "type": "minecraft:item",
           "name": "minecraft:diamond_helmet",
-          "weight": 12,
+          "weight": 3,
 	  "functions": [
             {
               "function": "enchant_with_levels",
@@ -22,7 +27,7 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:diamond_chestplate",
-          "weight": 12,
+          "weight": 3,
 	  "functions": [
             {
               "function": "enchant_with_levels",
@@ -37,7 +42,7 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:diamond_leggings",
-          "weight": 12,
+          "weight": 3,
 	  "functions": [
             {
               "function": "enchant_with_levels",
@@ -52,7 +57,7 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:diamond_boots",
-          "weight": 12,
+          "weight": 3,
 	  "functions": [
             {
               "function": "enchant_with_levels",
@@ -67,7 +72,7 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:crossbow",
-          "weight": 8,
+          "weight": 2,
 	  "functions": [
             {
               "function": "enchant_with_levels",
@@ -82,7 +87,7 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:diamond_axe",
-          "weight": 8,
+          "weight": 2,
 	  "functions": [
             {
               "function": "enchant_with_levels",
@@ -93,11 +98,6 @@
               }
             }
           ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "trials:heavy_core",
-          "weight": 2
         }
       ]
     }
