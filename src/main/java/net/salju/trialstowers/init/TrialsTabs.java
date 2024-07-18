@@ -50,6 +50,7 @@ public class TrialsTabs {
 				tabData.accept(TrialsItems.TRIAL_KEY.get());
 				tabData.accept(TrialsItems.TRIAL_KEY_OMNI.get());
 				tabData.accept(TrialsItems.BOGGED_SPAWN_EGG.get());
+				tabData.accept(TrialsItems.BREEZE_SPAWN_EGG.get());
 			}).build());
 			
 	public static final RegistryObject<CreativeModeTab> COPPER = REGISTRY.register("copper",

@@ -34,10 +34,12 @@ public class WindChargeModel<T extends WindCharge> extends EntityModel<T> {
 	}
 
 	@Override
-	public void setupAnim(T target, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-		this.body.yRot += Mth.cos(1.0F * 0.04F) * 0.04F + 0.04F;
-		this.innerwinds.yRot -= Mth.cos(1.0F * 0.04F) * 0.04F + 0.04F;
-		this.outerwinds.yRot += Mth.cos(1.0F * 0.04F) * 0.04F + 0.04F;
+	public void setupAnim(WindCharge target, float limbSwing, float limbSwingAmount, float ageInTicks, float headYaw, float headPitch) {
+		int e = (int) (1 * 360f);
+		float f = (Math.floorMod(target.level().getGameTime(), (long) e) + ageInTicks) / (float) e;
+		this.body.yRot = ((float) (f * Math.PI * -25));
+		this.innerwinds.yRot = ((float) (f * Math.PI * 25));
+		this.outerwinds.yRot = ((float) (f * Math.PI * -25));
 	}
 
 	@Override

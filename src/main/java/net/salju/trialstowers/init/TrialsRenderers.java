@@ -10,6 +10,7 @@ import net.minecraftforge.api.distmarker.Dist;
 public class TrialsRenderers {
 	@SubscribeEvent
 	public static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
+		event.registerEntityRenderer(TrialsMobs.BREEZE.get(), BreezeRenderer::new);
 		event.registerEntityRenderer(TrialsMobs.BOGGED.get(), BoggedRenderer::new);
 		event.registerEntityRenderer(TrialsMobs.WIND.get(), WindChargeRenderer::new);
 	}

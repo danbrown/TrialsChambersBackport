@@ -84,7 +84,8 @@ public class TrialsItems {
 	public static final RegistryObject<Item> BREEZE_ROD = REGISTRY.register("breeze_rod", () -> new Item(new Item.Properties()));
 	public static final RegistryObject<Item> WIND_CHARGE = REGISTRY.register("wind_charge", () -> new WindItem(new Item.Properties()));
 	public static final RegistryObject<Item> TRIAL_BOTTLE = REGISTRY.register("ominous_bottle", () -> new OmniItem(new Item.Properties()));
-	public static final RegistryObject<Item> BOGGED_SPAWN_EGG = REGISTRY.register("bogged_spawn_egg", () -> new ForgeSpawnEggItem(TrialsMobs.BOGGED, -6684775, -13421773, new Item.Properties()));
+	public static final RegistryObject<Item> BOGGED_SPAWN_EGG = REGISTRY.register("bogged_spawn_egg", () -> new ForgeSpawnEggItem(TrialsMobs.BOGGED, 5596200, 1646340, new Item.Properties()));
+	public static final RegistryObject<Item> BREEZE_SPAWN_EGG = REGISTRY.register("breeze_spawn_egg", () -> new ForgeSpawnEggItem(TrialsMobs.BREEZE, 12562377, 4087431, new Item.Properties()));
 	public static final RegistryObject<Item> FLOW_SHERD = REGISTRY.register("flow_pottery_sherd", () -> new Item(new Item.Properties()));
 	public static final RegistryObject<Item> GUSTER_SHERD = REGISTRY.register("guster_pottery_sherd", () -> new Item(new Item.Properties()));
 	public static final RegistryObject<Item> SCRAPE_SHERD = REGISTRY.register("scrape_pottery_sherd", () -> new Item(new Item.Properties()));

@@ -36,4 +36,12 @@ public class TrialsModSounds {
 	public static final RegistryObject<SoundEvent> MUSIC_DISC_CREATOR = REGISTRY.register("music_disc_creator", () -> SoundEvent.createVariableRangeEvent(new ResourceLocation("trials", "music_disc_creator")));
 	public static final RegistryObject<SoundEvent> MUSIC_DISC_CREATOR_BOX = REGISTRY.register("music_disc_creator_box", () -> SoundEvent.createVariableRangeEvent(new ResourceLocation("trials", "music_disc_creator_box")));
 	public static final RegistryObject<SoundEvent> MUSIC_DISC_PRECIPICE = REGISTRY.register("music_disc_precipice", () -> SoundEvent.createVariableRangeEvent(new ResourceLocation("trials", "music_disc_precipice")));
+	public static final RegistryObject<SoundEvent> BREEZE_CHARGE = REGISTRY.register("breeze_charge", () -> SoundEvent.createVariableRangeEvent(new ResourceLocation("trials", "breeze_charge")));
+	public static final RegistryObject<SoundEvent> BREEZE_DEATH = REGISTRY.register("breeze_death", () -> SoundEvent.createVariableRangeEvent(new ResourceLocation("trials", "breeze_death")));
+	public static final RegistryObject<SoundEvent> BREEZE_DEFLECT = REGISTRY.register("breeze_deflect", () -> SoundEvent.createVariableRangeEvent(new ResourceLocation("trials", "breeze_deflect")));
+	public static final RegistryObject<SoundEvent> BREEZE_HURT = REGISTRY.register("breeze_hurt", () -> SoundEvent.createVariableRangeEvent(new ResourceLocation("trials", "breeze_hurt")));
+	public static final RegistryObject<SoundEvent> BREEZE_IDLE = REGISTRY.register("breeze_idle", () -> SoundEvent.createVariableRangeEvent(new ResourceLocation("trials", "breeze_idle")));
+	public static final RegistryObject<SoundEvent> BREEZE_IDLE_AIR = REGISTRY.register("breeze_idle_air", () -> SoundEvent.createVariableRangeEvent(new ResourceLocation("trials", "breeze_idle_air")));
+	public static final RegistryObject<SoundEvent> BREEZE_SHOOT = REGISTRY.register("breeze_shoot", () -> SoundEvent.createVariableRangeEvent(new ResourceLocation("trials", "breeze_shoot")));
+	public static final RegistryObject<SoundEvent> BREEZE_SLIDE = REGISTRY.register("breeze_slide", () -> SoundEvent.createVariableRangeEvent(new ResourceLocation("trials", "breeze_slide")));
 }

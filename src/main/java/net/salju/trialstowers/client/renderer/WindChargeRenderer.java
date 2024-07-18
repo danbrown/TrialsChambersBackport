@@ -1,7 +1,6 @@
 package net.salju.trialstowers.client.renderer;
 
-import org.joml.Quaternionf;
-import net.salju.trialstowers.init.TrialsModels;
+import net.salju.trialstowers.init.TrialsModels;
 import net.salju.trialstowers.entity.WindCharge;
 import net.salju.trialstowers.client.model.WindChargeModel;
 import net.minecraft.resources.ResourceLocation;
@@ -11,8 +10,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.MultiBufferSource;
-import com.mojang.math.Axis;
-import com.mojang.blaze3d.vertex.VertexMultiConsumer;
+import com.mojang.blaze3d.vertex.VertexMultiConsumer;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 public class WindChargeRenderer extends EntityRenderer<WindCharge> {
@@ -25,13 +23,8 @@ public class WindChargeRenderer extends EntityRenderer<WindCharge> {
 
 	@Override
 	public void render(WindCharge target, float f1, float f2, PoseStack pose, MultiBufferSource buffer, int i) {
-		pose.pushPose();
-		int e = (int) (1 * 360f);
-		float f3 = (Math.floorMod(target.level().getGameTime(), (long) e) + f1) / (float) e;
-		Quaternionf rot = Axis.YP.rotation((float) (f3 * Math.PI * 25));
-		pose.mulPose(rot);
 		this.model.renderToBuffer(pose, VertexMultiConsumer.create(buffer.getBuffer(RenderType.entityTranslucent(this.getTextureLocation(target)))), i, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
-		pose.popPose();
+		this.model.setupAnim(target, 0.0F, 0.0F, f2, 0.0F, 0.0F);
 		super.render(target, f1, f2, pose, buffer, i);
 	}
 
