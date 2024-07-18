@@ -12,7 +12,7 @@
         {
           "type": "minecraft:loot_table",
           "name": "trials:gameplay/food_loot",
-          "weight": 2
+          "weight": 1
         }
       ]
     }
