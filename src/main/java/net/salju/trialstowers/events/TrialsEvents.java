@@ -9,8 +9,7 @@ import net.salju.trialstowers.init.TrialsEnchantments;
 import net.salju.trialstowers.init.TrialsEffects;
 import net.salju.trialstowers.block.TrialSpawnerEntity;
 import net.salju.trialstowers.TrialsMod;
-
-import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.eventbus.api.Event.Result;
 import net.minecraftforge.event.village.VillagerTradesEvent;
@@ -23,8 +22,7 @@ import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingConversionEvent;
 import net.minecraftforge.event.entity.EntityMobGriefingEvent;
 import net.minecraftforge.event.ForgeEventFactory;
-
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
@@ -117,6 +115,24 @@ public class TrialsEvents {
 		Entity target = event.getTarget();
 		if (event.isVanillaCritical() && player.getMainHandItem().getItem() instanceof MaceItem && player.level() instanceof ServerLevel lvl) {
 			int e = EnchantmentHelper.getItemEnchantmentLevel(TrialsEnchantments.WIND.get(), player.getMainHandItem());
+			if (player.fallDistance > 1.0F) {
+				int i = EnchantmentHelper.getItemEnchantmentLevel(TrialsEnchantments.DENSITY.get(), player.getMainHandItem());
+				float f = (player.fallDistance - 1.0F);
+				if (i > 0) {
+					f = (f * (i + 1.0F));
+				}
+				if (target.onGround()) {
+					if (player.fallDistance > 10.0F) {
+						lvl.playSound(null, target.blockPosition(), TrialsModSounds.MACE_SMASH_GROUND_HEAVY.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
+					} else {
+						lvl.playSound(null, target.blockPosition(), TrialsModSounds.MACE_SMASH_GROUND.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
+					}
+				} else {
+					lvl.playSound(null, target.blockPosition(), TrialsModSounds.MACE_SMASH_AIR.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
+				}
+				player.fallDistance = 0.0F;
+				event.setDamageModifier(event.getDamageModifier() + (0.1F * f));
+			}
 			if (e > 0) {
 				for (LivingEntity targets : target.level().getEntitiesOfClass(LivingEntity.class, target.getBoundingBox().inflate(4.76F))) {
 					if (targets.hasLineOfSight(target) && targets.isAlive()) {
@@ -162,24 +178,6 @@ public class TrialsEvents {
 				lvl.sendParticles(ParticleTypes.CLOUD, target.getX(), target.getY(), target.getZ(), 8, 1.5, 0.15, 1.5, 0);
 				lvl.sendParticles(ParticleTypes.EXPLOSION, target.getX(), target.getY(), target.getZ(), 4, 1.8, 0.15, 1.8, 0);
 				lvl.playSound(null, target.blockPosition(), TrialsModSounds.WIND_CHARGE.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
-			}
-			if (player.fallDistance > 3.0F) {
-				int i = EnchantmentHelper.getItemEnchantmentLevel(TrialsEnchantments.DENSITY.get(), player.getMainHandItem());
-				float f = (player.fallDistance - 3.0F);
-				if (i > 0) {
-					f = (f * (i + 1.0F));
-				}
-				if (target.onGround()) {
-					if (player.fallDistance > 10.0F) {
-						lvl.playSound(null, target.blockPosition(), TrialsModSounds.MACE_SMASH_GROUND_HEAVY.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
-					} else {
-						lvl.playSound(null, target.blockPosition(), TrialsModSounds.MACE_SMASH_GROUND.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
-					}
-				} else {
-					lvl.playSound(null, target.blockPosition(), TrialsModSounds.MACE_SMASH_AIR.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
-				}
-				player.fallDistance = 0.0F;
-				event.setDamageModifier(event.getDamageModifier() + (0.1F * f));
 			}
 		}
 	}
