@@ -34,6 +34,7 @@ public class TrialsMod {
 	public TrialsMod() {
 		MinecraftForge.EVENT_BUS.register(this);
 		IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+		TrialsStructures.REGISTRY.register(bus);
 		TrialsMenus.REGISTRY.register(bus);
 		TrialsModSounds.REGISTRY.register(bus);
 		TrialsMobs.REGISTRY.register(bus);

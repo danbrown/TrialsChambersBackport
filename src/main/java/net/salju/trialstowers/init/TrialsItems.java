@@ -78,7 +78,7 @@ public class TrialsItems {
 	public static final RegistryObject<Item> VAULT = block(TrialsBlocks.VAULT);
 	public static final RegistryObject<Item> VAULT_OMNI = block(TrialsBlocks.VAULT_OMNI);
 	public static final RegistryObject<Item> HEAVY_CORE = block(TrialsBlocks.HEAVY_CORE);
-	public static final RegistryObject<Item> MACE = REGISTRY.register("mace", () -> new MaceItem(TrialsItemTiers.MACE, 3, -2.8F, new Item.Properties()));
+	public static final RegistryObject<Item> MACE = REGISTRY.register("mace", () -> new MaceItem(TrialsItemTiers.MACE, 2, -3.4F, new Item.Properties().rarity(Rarity.EPIC)));
 	public static final RegistryObject<Item> TRIAL_KEY = REGISTRY.register("trial_key", () -> new Item(new Item.Properties()));
 	public static final RegistryObject<Item> TRIAL_KEY_OMNI = REGISTRY.register("trial_key_ominous", () -> new Item(new Item.Properties()));
 	public static final RegistryObject<Item> BREEZE_ROD = REGISTRY.register("breeze_rod", () -> new Item(new Item.Properties()));
@@ -98,6 +98,6 @@ public class TrialsItems {
 	public static final RegistryObject<Item> BANNER_PATTERN_GUSTER = REGISTRY.register("banner_pattern_guster", () -> new BannerPatternItem(TagKey.create(Registries.BANNER_PATTERN, new ResourceLocation(TrialsMod.MODID, "pattern_for_guster")), (new Item.Properties()).stacksTo(1)));
 
 	private static RegistryObject<Item> block(RegistryObject<Block> block) {
-		return REGISTRY.register(block.getId().getPath(), () -> new BlockItem(block.get(), new Item.Properties()));
+		return REGISTRY.register(block.getId().getPath(), () -> new BlockItem(block.get(), new Item.Properties().rarity(block == TrialsBlocks.HEAVY_CORE ? Rarity.EPIC : Rarity.COMMON)));
 	}
 }

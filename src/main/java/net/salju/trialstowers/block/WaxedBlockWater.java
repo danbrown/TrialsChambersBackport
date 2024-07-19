@@ -1,5 +1,8 @@
 package net.salju.trialstowers.block;
 
+import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
@@ -10,6 +13,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.core.Direction;
 import net.minecraft.core.BlockPos;
@@ -20,6 +24,21 @@ public class WaxedBlockWater extends WaxedBlockBase implements SimpleWaterlogged
 	public WaxedBlockWater(BlockBehaviour.Properties props) {
 		super(props);
 		this.registerDefaultState(this.stateDefinition.any().setValue(WATERLOGGED, false));
+	}
+
+	@Override
+	public VoxelShape getVisualShape(BlockState state, BlockGetter blok, BlockPos pos, CollisionContext context) {
+		return Shapes.empty();
+	}
+
+	@Override
+	public float getShadeBrightness(BlockState state, BlockGetter blok, BlockPos pos) {
+		return 1.0F;
+	}
+
+	@Override
+	public boolean propagatesSkylightDown(BlockState state, BlockGetter blok, BlockPos pos) {
+		return true;
 	}
 
 	@Override

@@ -37,8 +37,8 @@ public class TrialsTabs {
 				tabData.accept(TrialsItems.BANNER_PATTERN_GUSTER.get());
 				tabData.accept(TrialsBlocks.CRAFTER.get().asItem());
 				tabData.accept(TrialsBlocks.HEAVY_CORE.get().asItem());
-				tabData.accept(TrialsItems.BREEZE_ROD.get());
 				tabData.accept(TrialsItems.MACE.get());
+				tabData.accept(TrialsItems.BREEZE_ROD.get());
 				tabData.accept(TrialsItems.WIND_CHARGE.get());
 				tabData.accept(TrialsItems.FLOW_SHERD.get());
 				tabData.accept(TrialsItems.GUSTER_SHERD.get());
