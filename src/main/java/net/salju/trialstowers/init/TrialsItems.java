@@ -78,7 +78,7 @@ public class TrialsItems {
 	public static final RegistryObject<Item> VAULT = block(TrialsBlocks.VAULT);
 	public static final RegistryObject<Item> VAULT_OMNI = block(TrialsBlocks.VAULT_OMNI);
 	public static final RegistryObject<Item> HEAVY_CORE = block(TrialsBlocks.HEAVY_CORE);
-	public static final RegistryObject<Item> MACE = REGISTRY.register("mace", () -> new MaceItem(TrialsItemTiers.MACE, 2, -3.4F, new Item.Properties().rarity(Rarity.EPIC)));
+	public static final RegistryObject<Item> MACE = REGISTRY.register("mace", () -> new MaceItem(TrialsItemTiers.MACE, 2, -2.8F, new Item.Properties().rarity(Rarity.EPIC)));
 	public static final RegistryObject<Item> TRIAL_KEY = REGISTRY.register("trial_key", () -> new Item(new Item.Properties()));
 	public static final RegistryObject<Item> TRIAL_KEY_OMNI = REGISTRY.register("trial_key_ominous", () -> new Item(new Item.Properties()));
 	public static final RegistryObject<Item> BREEZE_ROD = REGISTRY.register("breeze_rod", () -> new Item(new Item.Properties()));

@@ -134,12 +134,14 @@ public class TrialsEvents {
 				event.setDamageModifier(event.getDamageModifier() + (0.1F * f));
 			}
 			if (e > 0) {
-				for (LivingEntity targets : target.level().getEntitiesOfClass(LivingEntity.class, target.getBoundingBox().inflate(4.76F))) {
-					if (targets.hasLineOfSight(target) && targets.isAlive()) {
+				for (LivingEntity targets : player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(4.76F))) {
+					if (targets.hasLineOfSight(player) && targets.isAlive()) {
 						targets.fallDistance = 0.0F;
-						double d = target.distanceTo(targets) * 0.65;
+						double d = player.distanceTo(targets) * 0.65;
+						int h = Mth.nextInt(targets.level().getRandom(), 2, 3);
 						if (targets == player) {
-							d = 0;
+							d = 0.0;
+							h = 3;
 							if (targets.getPersistentData().contains("FallDamageImmunity") && targets.getPersistentData().getDouble("FallDamageImmunity") > targets.getY()) {
 								targets.getPersistentData().remove("FallDamageImmunity");
 								targets.getPersistentData().putDouble("FallDamageImmunity", targets.blockPosition().below().getY());
@@ -147,7 +149,7 @@ public class TrialsEvents {
 								targets.getPersistentData().putDouble("FallDamageImmunity", targets.blockPosition().below().getY());
 							}
 						}
-						double y = (((double) Mth.nextInt(targets.level().getRandom(), 2, 3) * e) - d);
+						double y = ((double) Math.max(0.0, (h * e) - d));
 						if (targets instanceof ServerPlayer ply) {
 							TrialsMod.sendToClientPlayer(new ApplyKnockback(y), ply);
 						} else if (targets.getDeltaMovement().y() <= 5.0) {
@@ -155,14 +157,14 @@ public class TrialsEvents {
 						}
 					}
 				}
-				BlockPos top = BlockPos.containing((target.getX() + 4), (target.getY() + 2), (target.getZ() + 4));
-				BlockPos bot = BlockPos.containing((target.getX() - 4), (target.getY() - 2), (target.getZ() - 4));
+				BlockPos top = BlockPos.containing((player.getX() + 4), (player.getY() + 2), (player.getZ() + 4));
+				BlockPos bot = BlockPos.containing((player.getX() - 4), (player.getY() - 2), (player.getZ() - 4));
 				for (BlockPos pos : BlockPos.betweenClosed(top, bot)) {
 					BlockState state = lvl.getBlockState(pos);
 					if (state.getBlock() instanceof LeverBlock blok) {
-						blok.pull(state, target.level(), pos);
+						blok.pull(state, player.level(), pos);
 					} else if (state.getBlock() instanceof ButtonBlock blok) {
-						blok.press(state, target.level(), pos);
+						blok.press(state, player.level(), pos);
 					} else if (state.getBlock() instanceof AbstractCandleBlock blok) {
 						blok.extinguish(null, state, lvl, pos);
 					} else if (state.getBlock() instanceof TrapDoorBlock && state.getBlock() != Blocks.IRON_TRAPDOOR) {
@@ -175,9 +177,9 @@ public class TrialsEvents {
 						lvl.gameEvent(null, state.getValue(DoorBlock.OPEN) ? GameEvent.BLOCK_CLOSE : GameEvent.BLOCK_OPEN, pos);
 					}
 				}
-				lvl.sendParticles(ParticleTypes.CLOUD, target.getX(), target.getY(), target.getZ(), 8, 1.5, 0.15, 1.5, 0);
-				lvl.sendParticles(ParticleTypes.EXPLOSION, target.getX(), target.getY(), target.getZ(), 4, 1.8, 0.15, 1.8, 0);
-				lvl.playSound(null, target.blockPosition(), TrialsModSounds.WIND_CHARGE.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
+				lvl.sendParticles(ParticleTypes.CLOUD, player.getX(), player.getY(), player.getZ(), 8, 1.5, 0.15, 1.5, 0);
+				lvl.sendParticles(ParticleTypes.EXPLOSION, player.getX(), player.getY(), player.getZ(), 4, 1.8, 0.15, 1.8, 0);
+				lvl.playSound(null, player.blockPosition(), TrialsModSounds.WIND_CHARGE.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
 			}
 		}
 	}
@@ -263,7 +265,7 @@ public class TrialsEvents {
 						if (targets.hasLineOfSight(target) && targets.isAlive()) {
 							targets.fallDistance = 0.0F;
 							double d = target.distanceTo(targets) * 0.65;
-							double y = (((double) Mth.nextInt(targets.level().getRandom(), 2, 3) * e) - d);
+							double y = ((double) Math.max(0.0, (Mth.nextInt(target.level().getRandom(), 2, 3) * e) - d));
 							if (targets instanceof ServerPlayer ply) {
 								TrialsMod.sendToClientPlayer(new ApplyKnockback(y), ply);
 							} else if (targets.getDeltaMovement().y() <= 5.0) {
@@ -307,4 +309,4 @@ public class TrialsEvents {
 			}
 		}
 	}
-}
+}

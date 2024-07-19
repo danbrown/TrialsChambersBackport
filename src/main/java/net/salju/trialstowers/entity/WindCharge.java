@@ -87,7 +87,7 @@ public class WindCharge extends ThrowableProjectile {
 				if (target.hasLineOfSight(this) && target.isAlive()) {
 					target.fallDistance = 0.0F;
 					double d = this.distanceTo(target) * 0.65;
-					double y = (((double) Mth.nextInt(target.level().getRandom(), 2, 3) * (target.isCrouching() ? 4 : 2)) - d);
+					double y = ((double) Math.max(0.0, (Mth.nextInt(target.level().getRandom(), 2, 3) * (target.isCrouching() ? 4 : 2)) - d));
 					if (this.getOwner() != null) {
 						if (target == this.getOwner()) {
 							if (target.getPersistentData().contains("FallDamageImmunity") && target.getPersistentData().getDouble("FallDamageImmunity") > target.getY()) {
