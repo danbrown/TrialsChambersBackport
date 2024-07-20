@@ -9,6 +9,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -17,9 +18,11 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.Container;
 import net.minecraft.util.RandomSource;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.sounds.SoundEvents;
@@ -106,8 +109,24 @@ public class CrafterBlock extends BaseEntityBlock {
 				if (target.isEmpty() || !target.canCraftItem()) {
 					lvl.playSound(null, pos, SoundEvents.DISPENSER_FAIL, SoundSource.BLOCKS, 1.0F, 1.0F);
 				} else {
-					lvl.playSound(null, pos, SoundEvents.DISPENSER_LAUNCH, SoundSource.BLOCKS, 1.0F, 1.0F);
-					target.craftItem(state.getValue(FACING));
+					Container con = HopperBlockEntity.getContainerAt(lvl, pos.relative(state.getValue(FACING)));
+					if (con != null && !(con instanceof CrafterEntity) && this.canPlace(con, target.getResultItem())) {
+						lvl.playSound(null, pos, SoundEvents.DISPENSER_LAUNCH, SoundSource.BLOCKS, 1.0F, 1.0F);
+						HopperBlockEntity.addItem(target, con, target.getResultItem().copy(), state.getValue(FACING).getOpposite());
+						for (ItemStack stack : target.stacks) {
+							if (!stack.isEmpty() && !target.isResultItem(stack)) {
+								if (stack.hasCraftingRemainingItem() && this.canPlace(con, stack.getCraftingRemainingItem())) {
+									HopperBlockEntity.addItem(target, con, stack.getCraftingRemainingItem().copy(), state.getValue(FACING).getOpposite());
+								}
+								stack.shrink(1);
+							}
+						}
+					} else if (lvl.isEmptyBlock(pos.relative(state.getValue(FACING)))) {
+						lvl.playSound(null, pos, SoundEvents.DISPENSER_LAUNCH, SoundSource.BLOCKS, 1.0F, 1.0F);
+						target.craftItem(state.getValue(FACING));
+					} else {
+						lvl.playSound(null, pos, SoundEvents.DISPENSER_FAIL, SoundSource.BLOCKS, 1.0F, 1.0F);
+					}
 				}
 			} else if (state.getValue(TRIGGERED) && !state.getValue(CRAFTING)) {
 				lvl.setBlock(pos, state.setValue(CRAFTING, true), 2);
@@ -143,11 +162,27 @@ public class CrafterBlock extends BaseEntityBlock {
 
 	@Override
 	public boolean hasAnalogOutputSignal(BlockState state) {
-		return state.getValue(CRAFTING);
+		return true;
 	}
 
 	@Override
 	public int getAnalogOutputSignal(BlockState state, Level world, BlockPos pos) {
-		return (state.getValue(CRAFTING) ? 15 : 0);
+		if (world.getBlockEntity(pos) instanceof CrafterEntity target) {
+			return target.getPower();
+		}
+		return 0;
 	}
-}
+
+	public boolean canPlace(Container con, ItemStack stack) {
+		boolean check = false;
+		for (int i = 0; i < con.getContainerSize(); i++) {
+			if (con.canPlaceItem(i, stack)) {
+				if (con.getItem(i).isEmpty() || (con.getItem(i).getItem() == stack.getItem() && (con.getItem(i).getCount() + stack.getCount()) < con.getItem(i).getMaxStackSize())) {
+					check = true;
+					break;
+				}
+			}
+		}
+		return check;
+	}
+}

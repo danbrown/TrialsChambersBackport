@@ -196,6 +196,16 @@ public class CrafterEntity extends BaseContainerBlockEntity implements CraftingC
 		this.updateBlock();
 	}
 
+	public int getPower() {
+		int i = 0;
+		for (ItemStack stack : this.stacks) {
+			if (!stack.isEmpty() && !this.isResultItem(stack)) {
+				i++;
+			}
+		}
+		return i;
+	}
+
 	public boolean isResultItem(ItemStack stack) {
 		return (stack == this.getResultItem());
 	}
@@ -233,7 +243,7 @@ public class CrafterEntity extends BaseContainerBlockEntity implements CraftingC
 		}
 		Containers.dropItemStack(this.getLevel(), x, y, z, this.getResultItem());
 		for (ItemStack stack : this.stacks) {
-			if (!stack.isEmpty()) {
+			if (!stack.isEmpty() && !this.isResultItem(stack)) {
 				if (stack.hasCraftingRemainingItem()) {
 					Containers.dropItemStack(this.getLevel(), x, y, z, stack.getCraftingRemainingItem());
 				}
