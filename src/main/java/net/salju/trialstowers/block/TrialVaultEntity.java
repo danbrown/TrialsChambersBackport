@@ -19,6 +19,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.BlockPos;
 
 public class TrialVaultEntity extends BlockEntity {
+	private String table;
 	private boolean isOminous;
 	private int cd;
 
@@ -29,6 +30,9 @@ public class TrialVaultEntity extends BlockEntity {
 	@Override
 	public void saveAdditional(CompoundTag tag) {
 		super.saveAdditional(tag);
+		if (this.table != null) {
+			tag.putString("LootTable", this.table);
+		}
 		tag.putInt("Cooldown", this.cd);
 		tag.putBoolean("Ominous", this.isOminous);
 	}
@@ -36,6 +40,9 @@ public class TrialVaultEntity extends BlockEntity {
 	@Override
 	public void load(CompoundTag tag) {
 		super.load(tag);
+		if (tag.contains("LootTable")) {
+			this.table = tag.getString("LootTable");
+		}
 		this.cd = tag.getInt("Cooldown");
 		this.isOminous = tag.getBoolean("Ominous");
 	}
@@ -48,14 +55,22 @@ public class TrialVaultEntity extends BlockEntity {
 	@Override
 	public void onDataPacket(Connection queen, ClientboundBlockEntityDataPacket packet) {
 		if (packet != null && packet.getTag() != null) {
+			if (packet.getTag().contains("LootTable")) {
+				this.table = packet.getTag().getString("LootTable");
+			}
 			this.cd = packet.getTag().getInt("Cooldown");
+			this.isOminous = packet.getTag().getBoolean("Ominous");
 		}
 	}
 
 	@Override
 	public CompoundTag getUpdateTag() {
 		CompoundTag tag = new CompoundTag();
+		if (this.table != null) {
+			tag.putString("LootTable", this.table);
+		}
 		tag.putInt("Cooldown", this.cd);
+		tag.putBoolean("Ominous", this.isOminous);
 		return tag;
 	}
 
@@ -108,6 +123,9 @@ public class TrialVaultEntity extends BlockEntity {
 	}
 
 	public String getLootTable() {
+		if (this.table != null) {
+			return this.table;
+		}
 		return (this.isOminous() ? "trials:gameplay/vault_special_loot" : "trials:gameplay/vault_loot");
 	}
 

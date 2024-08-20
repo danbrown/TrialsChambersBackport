@@ -55,13 +55,16 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.Holder;
 import net.minecraft.core.BlockPos;
 import javax.annotation.Nullable;
-import java.util.List;
+import java.util.UUID;
+import java.util.List;
 import java.time.temporal.ChronoField;
 import java.time.LocalDate;
 import com.google.common.collect.Lists;
 
 public class TrialSpawnerEntity extends BlockEntity {
+	private String table;
 	private ItemStack egg;
+	private List<UUID> mobs = Lists.newArrayList();
 	private boolean isActive;
 	private int d;
 	private int cd;
@@ -75,6 +78,9 @@ public class TrialSpawnerEntity extends BlockEntity {
 	@Override
 	public void saveAdditional(CompoundTag tag) {
 		super.saveAdditional(tag);
+		if (this.table != null) {
+			tag.putString("LootTable", this.table);
+		}
 		if (this.egg != null) {
 			tag.put("SpawnEgg", this.egg.save(new CompoundTag()));
 		}
@@ -88,9 +94,11 @@ public class TrialSpawnerEntity extends BlockEntity {
 	@Override
 	public void load(CompoundTag tag) {
 		super.load(tag);
+		if (tag.contains("LootTable")) {
+			this.table = tag.getString("LootTable");
+		}
 		if (tag.contains("SpawnEgg")) {
-			ItemStack stack = ItemStack.of(tag.getCompound("SpawnEgg"));
-			this.egg = stack;
+			this.egg = ItemStack.of(tag.getCompound("SpawnEgg"));
 		}
 		this.isActive = tag.getBoolean("isActive");
 		this.d = tag.getInt("Difficulty");
@@ -107,9 +115,11 @@ public class TrialSpawnerEntity extends BlockEntity {
 	@Override
 	public void onDataPacket(Connection queen, ClientboundBlockEntityDataPacket packet) {
 		if (packet != null && packet.getTag() != null) {
+			if (packet.getTag().contains("LootTable")) {
+				this.table = packet.getTag().getString("LootTable");
+			}
 			if (packet.getTag().contains("SpawnEgg")) {
-				ItemStack stack = ItemStack.of(packet.getTag().getCompound("SpawnEgg"));
-				this.egg = stack;
+				this.egg = ItemStack.of(packet.getTag().getCompound("SpawnEgg"));
 			}
 			this.isActive = packet.getTag().getBoolean("isActive");
 			this.d = packet.getTag().getInt("Difficulty");
@@ -122,6 +132,9 @@ public class TrialSpawnerEntity extends BlockEntity {
 	@Override
 	public CompoundTag getUpdateTag() {
 		CompoundTag tag = new CompoundTag();
+		if (this.table != null) {
+			tag.putString("LootTable", this.table);
+		}
 		if (this.egg != null) {
 			tag.put("SpawnEgg", this.egg.save(new CompoundTag()));
 		}
@@ -151,7 +164,7 @@ public class TrialSpawnerEntity extends BlockEntity {
 									target.setTotalEnemies(target.getTotalEnemies() - e);
 									lvl.playSound(null, pos, TrialsModSounds.SPAWNER_SUMMON.get(), SoundSource.BLOCKS, 1.0F, 1.0F);
 									for (int i = 0; i != e; ++i) {
-										setUpMob(target.getSpawnType().create(lvl), lvl, target.getDifficulty(), target.findSpawnPositionNear(target.getSpawnType(), lvl, pos.above(), 2, world.getRandom()));
+										setUpMob(target, target.getSpawnType().create(lvl), lvl, target.getDifficulty(), target.findSpawnPositionNear(target.getSpawnType(), lvl, pos.above(), 2, world.getRandom()));
 									}
 								}
 							}
@@ -168,7 +181,7 @@ public class TrialSpawnerEntity extends BlockEntity {
 							target.setCd(40);
 							TrialsMod.queueServerWork(20, () -> {
 								lvl.playSound(null, pos, TrialsModSounds.SPAWNER_ITEM.get(), SoundSource.BLOCKS, 1.0F, 1.0F);
-								for (ItemStack stack : TrialsManager.getLoot(target, world, (block.isCursed(state) ? "trials:gameplay/spawner_special_loot" : "trials:gameplay/spawner_loot"))) {
+								for (ItemStack stack : TrialsManager.getLoot(target, world, target.getLootTable(block.isCursed(state)))) {
 									Containers.dropItemStack(world, pos.getX(), (pos.getY() + 1.0), pos.getZ(), stack);
 								}
 							});
@@ -240,14 +253,14 @@ public class TrialSpawnerEntity extends BlockEntity {
 	public static void checkPlayer(ServerLevel lvl, BlockPos pos, BlockState state, TrialSpawnerEntity target) {
 		Player player = lvl.getNearestPlayer(pos.getX(), pos.getY(), pos.getZ(), 64, false);
 		if (player != null) {
-			int i = 0;
-			for (Player players : lvl.getPlayers(LivingEntity::isAlive)) {
-				if (players.isCloseEnough(player, 32) && !players.isCreative() && !players.isSpectator()) {
-					i++;
+			List<UUID> list = target.getMobs();
+			if (!list.isEmpty()) {
+				for (int i =0; i < list.size(); i++) {
+					if (lvl.getEntity(list.get(i)) == null || (lvl.getEntity(list.get(i)) instanceof Mob mobster && !mobster.isAlive())) {
+						target.setRemainingEnemies(target.getRemainingEnemies() - 1);
+						target.removeUUID(i);
+					}
 				}
-			}
-			if (!player.isAlive() && i < 1) {
-				shutOff(lvl, pos, state, target);
 			}
 		} else {
 			shutOff(lvl, pos, state, target);
@@ -262,13 +275,14 @@ public class TrialSpawnerEntity extends BlockEntity {
 		lvl.setBlock(pos, state.setValue(TrialSpawnerBlock.ACTIVE, Boolean.valueOf(false)).setValue(TrialSpawnerBlock.CURSED, Boolean.valueOf(false)), 3);
 	}
 
-	public static void setUpMob(Entity entity, ServerLevel lvl, int i, BlockPos pos) {
+	public static void setUpMob(TrialSpawnerEntity spawner, Entity entity, ServerLevel lvl, int i, BlockPos pos) {
 		lvl.sendParticles(i >= 101 ? ParticleTypes.SOUL_FIRE_FLAME : ParticleTypes.FLAME, pos.getX(), (pos.getY() + 1.05), pos.getZ(), 12, 0.45, 0.25, 0.45, 0);
 		entity.moveTo(Vec3.atBottomCenterOf(pos));
 		if (entity instanceof Mob target) {
 			target.setCanPickUpLoot(false);
 			target.setPersistenceRequired();
-			target.getPersistentData().putInt("TrialSpawned", i);
+			spawner.addUUID(target.getUUID());
+			target.getPersistentData().putBoolean("TrialSpawned", true);
 			target.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
 			target.setDropChance(EquipmentSlot.OFFHAND, 0.0F);
 			target.setDropChance(EquipmentSlot.HEAD, 0.0F);
@@ -394,6 +408,13 @@ public class TrialSpawnerEntity extends BlockEntity {
 		return null;
 	}
 
+	public String getLootTable(boolean check) {
+		if (this.table != null) {
+			return this.table;
+		}
+		return (check ? "trials:gameplay/spawner_special_loot" : "trials:gameplay/spawner_loot");
+	}
+
 	public BlockPos findSpawnPositionNear(EntityType<?> type, ServerLevel lvl, BlockPos old, int range, RandomSource random) {
 		BlockPos pos = old;
 		for (int i = 0; i < 25; ++i) {
@@ -406,11 +427,23 @@ public class TrialSpawnerEntity extends BlockEntity {
 				break;
 			}
 		}
-		return BlockPos.containing(pos.getX() + 0.5, pos.getY() + 0.25, pos.getZ() + 0.5);
+		return BlockPos.containing(pos.getX(), pos.getY(), pos.getZ());
+	}
+
+	public void addUUID(UUID id) {
+		this.mobs.add(id);
+	}
+
+	public void removeUUID(int i) {
+		this.mobs.remove(i);
 	}
 
 	public void setEgg(ItemStack stack) {
 		this.egg = stack;
+	}
+
+	public List<UUID> getMobs() {
+		return this.mobs;
 	}
 
 	public boolean isActivelySpawning() {
@@ -458,4 +491,4 @@ public class TrialSpawnerEntity extends BlockEntity {
 		this.getLevel().updateNeighborsAt(this.getBlockPos(), this.getBlockState().getBlock());
 		this.getLevel().sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), 3);
 	}
-}
+}

@@ -7,7 +7,6 @@ import net.salju.trialstowers.init.TrialsModSounds;
 import net.salju.trialstowers.init.TrialsItems;
 import net.salju.trialstowers.init.TrialsEnchantments;
 import net.salju.trialstowers.init.TrialsEffects;
-import net.salju.trialstowers.block.TrialSpawnerEntity;
 import net.salju.trialstowers.TrialsMod;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -19,9 +18,7 @@ import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
-import net.minecraftforge.event.entity.living.LivingConversionEvent;
 import net.minecraftforge.event.entity.EntityMobGriefingEvent;
-import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -39,9 +36,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.npc.VillagerProfession;
-import net.minecraft.world.entity.monster.Stray;
 import net.minecraft.world.entity.monster.Slime;
-import net.minecraft.world.entity.monster.Skeleton;
 import net.minecraft.world.entity.monster.Silverfish;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -137,23 +132,17 @@ public class TrialsEvents {
 				for (LivingEntity targets : player.level().getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(4.76F))) {
 					if (targets.hasLineOfSight(player) && targets.isAlive()) {
 						targets.fallDistance = 0.0F;
-						double d = player.distanceTo(targets) * 0.65;
-						int h = Mth.nextInt(targets.level().getRandom(), 2, 3);
+						double d = player.distanceTo(targets) * 0.45;
+						int h = Mth.nextInt(target.level().getRandom(), 2, 3) * e;
 						if (targets == player) {
 							d = 0.0;
-							h = 3;
-							if (targets.getPersistentData().contains("FallDamageImmunity") && targets.getPersistentData().getDouble("FallDamageImmunity") > targets.getY()) {
-								targets.getPersistentData().remove("FallDamageImmunity");
-								targets.getPersistentData().putDouble("FallDamageImmunity", targets.blockPosition().below().getY());
-							} else if (!targets.getPersistentData().contains("FallDamageImmunity")) {
-								targets.getPersistentData().putDouble("FallDamageImmunity", targets.blockPosition().below().getY());
-							}
+							h = 4 + (3 * e);
 						}
-						double y = ((double) Math.max(0.0, (h * e) - d));
+						double y = ((double) Math.max(0.0, h - d));
 						if (targets instanceof ServerPlayer ply) {
 							TrialsMod.sendToClientPlayer(new ApplyKnockback(y), ply);
 						} else if (targets.getDeltaMovement().y() <= 5.0) {
-							targets.addDeltaMovement(new Vec3(targets.getDeltaMovement().x(), (y * 0.15), targets.getDeltaMovement().z()));
+							targets.addDeltaMovement(new Vec3(targets.getDeltaMovement().x(), y * 0.15, targets.getDeltaMovement().z()));
 						}
 					}
 				}
@@ -201,46 +190,12 @@ public class TrialsEvents {
 	}
 
 	@SubscribeEvent
-	public static void onEntityTick(LivingEvent.LivingTickEvent event) {
-		if (event.getEntity().getPersistentData().contains("FallDamageImmunity") && event.getEntity().onGround()) {
-			event.getEntity().getPersistentData().remove("FallDamageImmunity");
-		}
-		if (event.getEntity() instanceof Skeleton kevin && event.getEntity().getPersistentData().getInt("TrialSpawned") > 0 && !event.getEntity().getPersistentData().getBoolean("TrialFreezing")) {
-			if (kevin.isShaking()) {
-				event.getEntity().getPersistentData().putBoolean("TrialFreezing", true);
-				TrialsMod.queueServerWork(150, () -> {
-					if (kevin != null && kevin.isAlive()) {
-						if (kevin.isShaking()) {
-							Stray frosty = kevin.convertTo(EntityType.STRAY, true);
-							if (!kevin.isSilent()) {
-								kevin.level().levelEvent(null, 1048, kevin.blockPosition(), 0);
-							}
-							if (frosty != null) {
-								ForgeEventFactory.onLivingConvert(kevin, frosty);
-							}
-						} else {
-							event.getEntity().getPersistentData().remove("TrialFreezing");
-						}
-					}
-				});
-			}
-		}
-	}
-
-	@SubscribeEvent
 	public static void onGrief(EntityMobGriefingEvent event) {
 		if (event.getEntity() != null) {
-			if (event.getEntity() instanceof Silverfish && event.getEntity().getPersistentData().getInt("TrialSpawned") > 0) {
-				event.setResult(Result.DENY);
-			}
-		}
-	}
-
-	@SubscribeEvent
-	public static void onConvert(LivingConversionEvent.Post event) {
-		if (event.getEntity() != null && event.getOutcome() != null) {
-			if (event.getEntity().getPersistentData().getInt("TrialSpawned") > 0) {
-				event.getOutcome().getPersistentData().putInt("TrialSpawned", event.getEntity().getPersistentData().getInt("TrialSpawned"));
+			if (event.getEntity().getType() == EntityType.CREEPER || event.getEntity().getType() == EntityType.SILVERFISH) {
+				if (event.getEntity().getPersistentData().getBoolean("TrialSpawned")) {
+					event.setResult(Result.DENY);
+				}
 			}
 		}
 	}
@@ -250,12 +205,6 @@ public class TrialsEvents {
 		if (event.getEntity() != null) {
 			LivingEntity target = event.getEntity();
 			if (target.level() instanceof ServerLevel lvl) {
-				if (target.getPersistentData().getInt("TrialSpawned") > 0) {
-					TrialSpawnerEntity block = TrialsManager.getSpawner(target, target.blockPosition(), lvl, 64);
-					if (block != null) {
-						block.setRemainingEnemies(block.getRemainingEnemies() - 1);
-					}
-				}
 				if (target instanceof Raider && target.getItemBySlot(EquipmentSlot.HEAD).getItem() == Items.WHITE_BANNER) {
 					Containers.dropItemStack(target.level(), target.getX(), target.getY(), target.getZ(), new ItemStack(TrialsItems.TRIAL_BOTTLE.get()));
 				}
