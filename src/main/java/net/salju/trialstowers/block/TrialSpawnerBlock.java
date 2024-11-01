@@ -1,8 +1,11 @@
 package net.salju.trialstowers.block;
 
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.phys.HitResult;
 import net.salju.trialstowers.init.TrialsProperties;
 import net.salju.trialstowers.init.TrialsBlockEntities;
-import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.BlockState;
@@ -19,9 +22,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.util.Mth;
 import net.minecraft.core.BlockPos;
-import javax.annotation.Nullable;
+
+import javax.annotation.Nullable;
 
 public class TrialSpawnerBlock extends BaseEntityBlock {
 	public static final BooleanProperty ACTIVE = TrialsProperties.ACTIVE;
@@ -86,4 +89,27 @@ public class TrialSpawnerBlock extends BaseEntityBlock {
 	public boolean isCursed(BlockState state) {
 		return state.getValue(CURSED);
 	}
-}
+
+	@Override
+	public ItemStack getCloneItemStack(BlockState state, HitResult hitResult, BlockGetter level, BlockPos pos, Player player) {
+		// include all the data from the block entity
+		BlockEntity entity = level.getBlockEntity(pos);
+		if (entity instanceof TrialSpawnerEntity target) {
+			ItemStack stack = super.getCloneItemStack(state, hitResult, level, pos, player);
+			stack.addTagElement("BlockEntityTag", target.getUpdateTag());
+			return stack;
+		}
+		return super.getCloneItemStack(state, hitResult, level, pos, player);
+	}
+
+	@Override
+	public void setPlacedBy(Level world, BlockPos pos, BlockState state, @Nullable LivingEntity livingEntity, ItemStack stack) {
+		super.setPlacedBy(world, pos, state, livingEntity, stack);
+		if (stack.hasTag() && stack.getTag().contains("BlockEntityTag")) {
+			BlockEntity entity = world.getBlockEntity(pos);
+			if (entity instanceof TrialSpawnerEntity spawnerEntity) {
+				spawnerEntity.load(stack.getTag().getCompound("BlockEntityTag"));
+			}
+		}
+	}
+}
