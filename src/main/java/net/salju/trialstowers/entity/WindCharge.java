@@ -108,40 +108,44 @@ public class WindCharge extends ThrowableProjectile {
 			}
 			BlockPos top = BlockPos.containing((this.getX() + 4), (this.getY() + 2), (this.getZ() + 4));
 			BlockPos bot = BlockPos.containing((this.getX() - 4), (this.getY() - 2), (this.getZ() - 4));
-			for (BlockPos pos : BlockPos.betweenClosed(top, bot)) {
-				BlockState state = lvl.getBlockState(pos);
-				if (state.getBlock() instanceof LeverBlock blok) {
-					blok.pull(state, this.level(), pos);
-				} else if (state.getBlock() instanceof ButtonBlock blok) {
-					blok.press(state, this.level(), pos);
-				} else if (state.getBlock() instanceof AbstractCandleBlock blok) {
-					blok.extinguish(null, state, lvl, pos);
-				} else if (state.getBlock() instanceof TrapDoorBlock && state.getBlock() != Blocks.IRON_TRAPDOOR) {
-					lvl.setBlock(pos, state.cycle(TrapDoorBlock.OPEN), 2);
-					lvl.playSound(null, pos, state.getValue(TrapDoorBlock.OPEN) ? SoundEvents.WOODEN_TRAPDOOR_CLOSE : SoundEvents.WOODEN_TRAPDOOR_OPEN, SoundSource.BLOCKS, 1.0F, lvl.getRandom().nextFloat() * 0.1F + 0.9F);
-					lvl.gameEvent(null, state.getValue(TrapDoorBlock.OPEN) ? GameEvent.BLOCK_CLOSE : GameEvent.BLOCK_OPEN, pos);
-				} else if (state.getBlock() instanceof DoorBlock && state.getValue(DoorBlock.HALF) == DoubleBlockHalf.LOWER && state.getBlock() != Blocks.IRON_DOOR) {
-					lvl.setBlock(pos, state.cycle(DoorBlock.OPEN), 10);
-					lvl.playSound(null, pos, state.getValue(DoorBlock.OPEN) ? SoundEvents.WOODEN_DOOR_CLOSE : SoundEvents.WOODEN_DOOR_OPEN, SoundSource.BLOCKS, 1.0F, lvl.getRandom().nextFloat() * 0.1F + 0.9F);
-					lvl.gameEvent(null, state.getValue(DoorBlock.OPEN) ? GameEvent.BLOCK_CLOSE : GameEvent.BLOCK_OPEN, pos);
-				} else if (state.getBlock() instanceof CampfireBlock) {
-					lvl.setBlock(pos, state.setValue(CampfireBlock.LIT, false), 2);
-				} else if (state.getBlock() instanceof WeatheringBlockLight || state.getBlock() instanceof WaxedBlockLight || state.getBlock() instanceof TuffLightBlock) {
-					lvl.setBlock(pos, state.setValue(BlockStateProperties.LIT, !state.getValue(BlockStateProperties.LIT)), 2);
-				} else if (state.getBlock() instanceof DispenserBlock dispenserBlock) {
-					lvl.scheduleTick(pos, dispenserBlock, 4);
-					lvl.setBlock(pos, state.setValue(DispenserBlock.TRIGGERED, true), 4);
-				} else if (state.getBlock() instanceof DropperBlock dropperBlock) {
-					lvl.scheduleTick(pos, dropperBlock, 4);
-					lvl.setBlock(pos, state.setValue(DropperBlock.TRIGGERED, true), 4);
-				} else if (state.getBlock() instanceof BaseFireBlock) {
-					lvl.removeBlock(pos, false);
-				}
-			}
+			affectBlocks(top, bot, lvl);
 			lvl.sendParticles(ParticleTypes.CLOUD, this.getX(), this.getY(), this.getZ(), 8, 1.5, 0.15, 1.5, 0);
 			lvl.sendParticles(ParticleTypes.EXPLOSION, this.getX(), this.getY(), this.getZ(), 4, 1.8, 0.15, 1.8, 0);
 			lvl.playSound(null, this.blockPosition(), TrialsModSounds.WIND_CHARGE.get(), SoundSource.NEUTRAL, 1.0F, 1.0F);
 		}
 		this.discard();
+	}
+
+	public static void affectBlocks(BlockPos top, BlockPos bot, ServerLevel lvl) {
+		for (BlockPos pos : BlockPos.betweenClosed(top, bot)) {
+			BlockState state = lvl.getBlockState(pos);
+			if (state.getBlock() instanceof LeverBlock blok) {
+				blok.pull(state, lvl, pos);
+			} else if (state.getBlock() instanceof ButtonBlock blok) {
+				blok.press(state, lvl, pos);
+			} else if (state.getBlock() instanceof AbstractCandleBlock blok) {
+				blok.extinguish(null, state, lvl, pos);
+			} else if (state.getBlock() instanceof TrapDoorBlock && state.getBlock() != Blocks.IRON_TRAPDOOR) {
+				lvl.setBlock(pos, state.cycle(TrapDoorBlock.OPEN), 2);
+				lvl.playSound(null, pos, state.getValue(TrapDoorBlock.OPEN) ? SoundEvents.WOODEN_TRAPDOOR_CLOSE : SoundEvents.WOODEN_TRAPDOOR_OPEN, SoundSource.BLOCKS, 1.0F, lvl.getRandom().nextFloat() * 0.1F + 0.9F);
+				lvl.gameEvent(null, state.getValue(TrapDoorBlock.OPEN) ? GameEvent.BLOCK_CLOSE : GameEvent.BLOCK_OPEN, pos);
+			} else if (state.getBlock() instanceof DoorBlock && state.getValue(DoorBlock.HALF) == DoubleBlockHalf.LOWER && state.getBlock() != Blocks.IRON_DOOR) {
+				lvl.setBlock(pos, state.cycle(DoorBlock.OPEN), 10);
+				lvl.playSound(null, pos, state.getValue(DoorBlock.OPEN) ? SoundEvents.WOODEN_DOOR_CLOSE : SoundEvents.WOODEN_DOOR_OPEN, SoundSource.BLOCKS, 1.0F, lvl.getRandom().nextFloat() * 0.1F + 0.9F);
+				lvl.gameEvent(null, state.getValue(DoorBlock.OPEN) ? GameEvent.BLOCK_CLOSE : GameEvent.BLOCK_OPEN, pos);
+			} else if (state.getBlock() instanceof CampfireBlock) {
+				lvl.setBlock(pos, state.setValue(CampfireBlock.LIT, false), 2);
+			} else if (state.getBlock() instanceof WeatheringBlockLight || state.getBlock() instanceof WaxedBlockLight || state.getBlock() instanceof TuffLightBlock) {
+				lvl.setBlock(pos, state.setValue(BlockStateProperties.LIT, !state.getValue(BlockStateProperties.LIT)), 2);
+			} else if (state.getBlock() instanceof DispenserBlock dispenserBlock) {
+				lvl.scheduleTick(pos, dispenserBlock, 4);
+				lvl.setBlock(pos, state.setValue(DispenserBlock.TRIGGERED, true), 4);
+			} else if (state.getBlock() instanceof DropperBlock dropperBlock) {
+				lvl.scheduleTick(pos, dropperBlock, 4);
+				lvl.setBlock(pos, state.setValue(DropperBlock.TRIGGERED, true), 4);
+			} else if (state.getBlock() instanceof BaseFireBlock) {
+				lvl.removeBlock(pos, false);
+			}
+		}
 	}
 }

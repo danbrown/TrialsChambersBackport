@@ -1,5 +1,6 @@
 package net.salju.trialstowers.events;
 
+import net.salju.trialstowers.entity.WindCharge;
 import net.salju.trialstowers.network.ApplyKnockback;
 import net.salju.trialstowers.item.MaceItem;
 import net.salju.trialstowers.init.TrialsTags;
@@ -8,28 +9,21 @@ import net.salju.trialstowers.init.TrialsItems;
 import net.salju.trialstowers.init.TrialsEnchantments;
 import net.salju.trialstowers.init.TrialsEffects;
 import net.salju.trialstowers.TrialsMod;
-import net.minecraftforge.fml.common.Mod;
+
+import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.eventbus.api.Event.Result;
 import net.minecraftforge.event.village.VillagerTradesEvent;
 import net.minecraftforge.event.entity.player.CriticalHitEvent;
 import net.minecraftforge.event.entity.living.MobEffectEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
-import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.EntityMobGriefingEvent;
-import net.minecraft.world.phys.Vec3;
+
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
-import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.TrapDoorBlock;
-import net.minecraft.world.level.block.LeverBlock;
-import net.minecraft.world.level.block.DoorBlock;
-import net.minecraft.world.level.block.ButtonBlock;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.AbstractCandleBlock;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ItemStack;
@@ -47,7 +41,6 @@ import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.Containers;
 import net.minecraft.util.Mth;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.core.particles.ParticleTypes;
@@ -148,24 +141,7 @@ public class TrialsEvents {
 				}
 				BlockPos top = BlockPos.containing((player.getX() + 4), (player.getY() + 2), (player.getZ() + 4));
 				BlockPos bot = BlockPos.containing((player.getX() - 4), (player.getY() - 2), (player.getZ() - 4));
-				for (BlockPos pos : BlockPos.betweenClosed(top, bot)) {
-					BlockState state = lvl.getBlockState(pos);
-					if (state.getBlock() instanceof LeverBlock blok) {
-						blok.pull(state, player.level(), pos);
-					} else if (state.getBlock() instanceof ButtonBlock blok) {
-						blok.press(state, player.level(), pos);
-					} else if (state.getBlock() instanceof AbstractCandleBlock blok) {
-						blok.extinguish(null, state, lvl, pos);
-					} else if (state.getBlock() instanceof TrapDoorBlock && state.getBlock() != Blocks.IRON_TRAPDOOR) {
-						lvl.setBlock(pos, state.cycle(TrapDoorBlock.OPEN), 2);
-						lvl.playSound(null, pos, state.getValue(TrapDoorBlock.OPEN) ? SoundEvents.WOODEN_TRAPDOOR_CLOSE : SoundEvents.WOODEN_TRAPDOOR_OPEN, SoundSource.BLOCKS, 1.0F, lvl.getRandom().nextFloat() * 0.1F + 0.9F);
-						lvl.gameEvent(null, state.getValue(TrapDoorBlock.OPEN) ? GameEvent.BLOCK_CLOSE : GameEvent.BLOCK_OPEN, pos);
-					} else if (state.getBlock() instanceof DoorBlock && state.getValue(DoorBlock.HALF) == DoubleBlockHalf.LOWER && state.getBlock() != Blocks.IRON_DOOR) {
-						lvl.setBlock(pos, state.cycle(DoorBlock.OPEN), 10);
-						lvl.playSound(null, pos, state.getValue(DoorBlock.OPEN) ? SoundEvents.WOODEN_DOOR_CLOSE : SoundEvents.WOODEN_DOOR_OPEN, SoundSource.BLOCKS, 1.0F, lvl.getRandom().nextFloat() * 0.1F + 0.9F);
-						lvl.gameEvent(null, state.getValue(DoorBlock.OPEN) ? GameEvent.BLOCK_CLOSE : GameEvent.BLOCK_OPEN, pos);
-					}
-				}
+				WindCharge.affectBlocks(top, bot, lvl);
 				lvl.sendParticles(ParticleTypes.CLOUD, player.getX(), player.getY(), player.getZ(), 8, 1.5, 0.15, 1.5, 0);
 				lvl.sendParticles(ParticleTypes.EXPLOSION, player.getX(), player.getY(), player.getZ(), 4, 1.8, 0.15, 1.8, 0);
 				lvl.playSound(null, player.blockPosition(), TrialsModSounds.WIND_CHARGE.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
@@ -224,24 +200,7 @@ public class TrialsEvents {
 					}
 					BlockPos top = BlockPos.containing((target.getX() + 4), (target.getY() + 2), (target.getZ() + 4));
 					BlockPos bot = BlockPos.containing((target.getX() - 4), (target.getY() - 2), (target.getZ() - 4));
-					for (BlockPos pos : BlockPos.betweenClosed(top, bot)) {
-						BlockState state = lvl.getBlockState(pos);
-						if (state.getBlock() instanceof LeverBlock blok) {
-							blok.pull(state, target.level(), pos);
-						} else if (state.getBlock() instanceof ButtonBlock blok) {
-							blok.press(state, target.level(), pos);
-						} else if (state.getBlock() instanceof AbstractCandleBlock blok) {
-							blok.extinguish(null, state, lvl, pos);
-						} else if (state.getBlock() instanceof TrapDoorBlock && state.getBlock() != Blocks.IRON_TRAPDOOR) {
-							lvl.setBlock(pos, state.cycle(TrapDoorBlock.OPEN), 2);
-							lvl.playSound(null, pos, state.getValue(TrapDoorBlock.OPEN) ? SoundEvents.WOODEN_TRAPDOOR_CLOSE : SoundEvents.WOODEN_TRAPDOOR_OPEN, SoundSource.BLOCKS, 1.0F, lvl.getRandom().nextFloat() * 0.1F + 0.9F);
-							lvl.gameEvent(null, state.getValue(TrapDoorBlock.OPEN) ? GameEvent.BLOCK_CLOSE : GameEvent.BLOCK_OPEN, pos);
-						} else if (state.getBlock() instanceof DoorBlock && state.getValue(DoorBlock.HALF) == DoubleBlockHalf.LOWER && state.getBlock() != Blocks.IRON_DOOR) {
-							lvl.setBlock(pos, state.cycle(DoorBlock.OPEN), 10);
-							lvl.playSound(null, pos, state.getValue(DoorBlock.OPEN) ? SoundEvents.WOODEN_DOOR_CLOSE : SoundEvents.WOODEN_DOOR_OPEN, SoundSource.BLOCKS, 1.0F, lvl.getRandom().nextFloat() * 0.1F + 0.9F);
-							lvl.gameEvent(null, state.getValue(DoorBlock.OPEN) ? GameEvent.BLOCK_CLOSE : GameEvent.BLOCK_OPEN, pos);
-						}
-					}
+					WindCharge.affectBlocks(top, bot, lvl);
 					lvl.sendParticles(ParticleTypes.CLOUD, target.getX(), target.getY(), target.getZ(), 8, 1.5, 0.15, 1.5, 0);
 					lvl.sendParticles(ParticleTypes.EXPLOSION, target.getX(), target.getY(), target.getZ(), 4, 1.8, 0.15, 1.8, 0);
 					lvl.playSound(null, target.blockPosition(), TrialsModSounds.WIND_CHARGE.get(), SoundSource.PLAYERS, 1.0F, 1.0F);
@@ -258,4 +217,4 @@ public class TrialsEvents {
 			}
 		}
 	}
-}
+}
