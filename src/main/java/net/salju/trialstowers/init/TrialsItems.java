@@ -1,22 +1,31 @@
 package net.salju.trialstowers.init;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.BlockSource;
+import net.minecraft.core.Direction;
+import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
+import net.minecraft.core.dispenser.DispenseItemBehavior;
+import net.minecraft.world.item.*;
+import net.minecraft.world.level.block.DispenserBlock;
+import net.salju.trialstowers.entity.WindCharge;
 import net.salju.trialstowers.item.*;
 import net.salju.trialstowers.TrialsMod;
-import net.minecraftforge.registries.RegistryObject;
+
+import net.minecraftforge.registries.RegistryObject;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.common.ForgeSpawnEggItem;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.item.SmithingTemplateItem;
-import net.minecraft.world.item.RecordItem;
-import net.minecraft.world.item.Rarity;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.BannerPatternItem;
+
+import net.minecraft.world.level.block.Block;
 import net.minecraft.tags.TagKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.registries.Registries;
 
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+
+@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 public class TrialsItems {
 	public static final DeferredRegister<Item> REGISTRY = DeferredRegister.create(ForgeRegistries.ITEMS, TrialsMod.MODID);
 	public static final RegistryObject<Item> TUFF_STAIRS = block(TrialsBlocks.TUFF_STAIRS);
@@ -92,12 +101,37 @@ public class TrialsItems {
 	public static final RegistryObject<Item> BOLT_TEMPLATE = REGISTRY.register("bolt_template", () -> SmithingTemplateItem.createArmorTrimTemplate(new ResourceLocation("bolt")));
 	public static final RegistryObject<Item> FLOW_TEMPLATE = REGISTRY.register("flow_template", () -> SmithingTemplateItem.createArmorTrimTemplate(new ResourceLocation("flow")));
 	public static final RegistryObject<Item> MUSIC_DISC_CREATOR = REGISTRY.register("music_disc_creator", () -> new RecordItem(0, () -> TrialsModSounds.MUSIC_DISC_CREATOR.get(), new Item.Properties().stacksTo(1).rarity(Rarity.RARE), 3540));
-	public static final RegistryObject<Item> MUSIC_DISC_CREATOR_BOX = REGISTRY.register("music_disc_creator_box", () -> new RecordItem(0, () -> TrialsModSounds.MUSIC_DISC_CREATOR_BOX.get(), new Item.Properties().stacksTo(1).rarity(Rarity.RARE), 1480));
+	public static final RegistryObject<Item> MUSIC_DISC_CREATOR_BOX = REGISTRY.register("music_disc_creator_box",
+ () -> new RecordItem(0, () -> TrialsModSounds.MUSIC_DISC_CREATOR_BOX.get(), new Item.Properties().stacksTo(1).rarity(Rarity.RARE), 1480));
 	public static final RegistryObject<Item> MUSIC_DISC_PRECIPICE = REGISTRY.register("music_disc_precipice", () -> new RecordItem(0, () -> TrialsModSounds.MUSIC_DISC_PRECIPICE.get(), new Item.Properties().stacksTo(1).rarity(Rarity.RARE), 5980));
-	public static final RegistryObject<Item> BANNER_PATTERN_FLOW = REGISTRY.register("banner_pattern_flow", () -> new BannerPatternItem(TagKey.create(Registries.BANNER_PATTERN, new ResourceLocation(TrialsMod.MODID, "pattern_for_flow")), (new Item.Properties()).stacksTo(1)));
-	public static final RegistryObject<Item> BANNER_PATTERN_GUSTER = REGISTRY.register("banner_pattern_guster", () -> new BannerPatternItem(TagKey.create(Registries.BANNER_PATTERN, new ResourceLocation(TrialsMod.MODID, "pattern_for_guster")), (new Item.Properties()).stacksTo(1)));
+	public static final RegistryObject<Item> BANNER_PATTERN_FLOW = REGISTRY.register("banner_pattern_flow",
+ () -> new BannerPatternItem(TagKey.create(Registries.BANNER_PATTERN, new ResourceLocation(TrialsMod.MODID, "pattern_for_flow")), (new Item.Properties()).stacksTo(1)));
+	public static final RegistryObject<Item> BANNER_PATTERN_GUSTER = REGISTRY.register("banner_pattern_guster",
+ () -> new BannerPatternItem(TagKey.create(Registries.BANNER_PATTERN, new ResourceLocation(TrialsMod.MODID, "pattern_for_guster")), (new Item.Properties()).stacksTo(1)));
 
 	private static RegistryObject<Item> block(RegistryObject<Block> block) {
 		return REGISTRY.register(block.getId().getPath(), () -> new BlockItem(block.get(), new Item.Properties().rarity(block == TrialsBlocks.HEAVY_CORE ? Rarity.EPIC : Rarity.COMMON)));
 	}
-}
+
+	@SubscribeEvent
+	public static void init(FMLCommonSetupEvent event) {
+		event.enqueueWork(() -> {
+			DispenserBlock.registerBehavior(WIND_CHARGE.get(), new DefaultDispenseItemBehavior() {
+				public ItemStack execute(BlockSource blockSource, ItemStack stack) {
+					Direction direction = blockSource.getBlockState().getValue(DispenserBlock.FACING);
+					WindCharge projectileInstance = new WindCharge(TrialsMobs.WIND.get(), blockSource.getLevel());
+					DispenseItemBehavior.setEntityPokingOutOfBlock(blockSource, projectileInstance, direction);
+					BlockPos pos = blockSource.getPos().offset(direction.getStepX(), direction.getStepY(), direction.getStepZ());
+					projectileInstance.setPos(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5); // Center it in the block
+					projectileInstance.shoot(direction.getStepX(), direction.getStepY(), direction.getStepZ(), 1.45F, 1.0F);
+					blockSource.getLevel().addFreshEntity(projectileInstance);
+					stack.shrink(1);
+					return stack;
+				}
+				protected void playSound(BlockSource blockSource) {
+					blockSource.getLevel().levelEvent(1004, blockSource.getPos(), 0);
+				}
+			});
+		});
+	}
+}
