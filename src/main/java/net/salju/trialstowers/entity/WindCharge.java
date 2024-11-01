@@ -134,6 +134,8 @@ public class WindCharge extends ThrowableProjectile {
 				} else if (state.getBlock() instanceof DropperBlock dropperBlock) {
 					lvl.scheduleTick(pos, dropperBlock, 4);
 					lvl.setBlock(pos, state.setValue(DropperBlock.TRIGGERED, true), 4);
+				} else if (state.getBlock() instanceof BaseFireBlock) {
+					lvl.removeBlock(pos, false);
 				}
 			}
 			lvl.sendParticles(ParticleTypes.CLOUD, this.getX(), this.getY(), this.getZ(), 8, 1.5, 0.15, 1.5, 0);
