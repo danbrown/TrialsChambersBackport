@@ -7,7 +7,7 @@ import net.salju.trialstowers.init.TrialsEffects;
 import net.salju.trialstowers.init.TrialsBlockEntities;
 import net.salju.trialstowers.events.TrialsManager;
 import net.salju.trialstowers.TrialsMod;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.Blocks;
@@ -54,12 +54,16 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.Holder;
 import net.minecraft.core.BlockPos;
-import javax.annotation.Nullable;
-import java.util.UUID;
+
+import javax.annotation.Nullable;
+
+import java.util.UUID;
 import java.util.List;
-import java.time.temporal.ChronoField;
+
+import java.time.temporal.ChronoField;
 import java.time.LocalDate;
-import com.google.common.collect.Lists;
+
+import com.google.common.collect.Lists;
 
 public class TrialSpawnerEntity extends BlockEntity {
 	private String table;
@@ -70,6 +74,7 @@ public class TrialSpawnerEntity extends BlockEntity {
 	private int cd;
 	private int e;
 	private int k;
+	private boolean disableEffects;
 
 	public TrialSpawnerEntity(BlockPos pos, BlockState state) {
 		super(TrialsBlockEntities.SPAWNER.get(), pos, state);
@@ -89,6 +94,7 @@ public class TrialSpawnerEntity extends BlockEntity {
 		tag.putInt("Cooldown", this.cd);
 		tag.putInt("Enemies", this.e);
 		tag.putInt("Killed", this.k);
+		tag.putBoolean("DisableEffects", this.disableEffects);
 	}
 
 	@Override
@@ -105,6 +111,7 @@ public class TrialSpawnerEntity extends BlockEntity {
 		this.cd = tag.getInt("Cooldown");
 		this.e = tag.getInt("Enemies");
 		this.k = tag.getInt("Killed");
+		this.disableEffects = tag.getBoolean("DisableEffects");
 	}
 
 	@Override
@@ -126,6 +133,7 @@ public class TrialSpawnerEntity extends BlockEntity {
 			this.cd = packet.getTag().getInt("Cooldown");
 			this.e = packet.getTag().getInt("Enemies");
 			this.k = packet.getTag().getInt("Killed");
+			this.disableEffects = packet.getTag().getBoolean("DisableEffects");
 		}
 	}
 
@@ -143,6 +151,7 @@ public class TrialSpawnerEntity extends BlockEntity {
 		tag.putInt("Cooldown", this.cd);
 		tag.putInt("Enemies", this.e);
 		tag.putInt("Killed", this.k);
+		tag.putBoolean("DisableEffects", this.disableEffects);
 		return tag;
 	}
 
@@ -164,7 +173,7 @@ public class TrialSpawnerEntity extends BlockEntity {
 									target.setTotalEnemies(target.getTotalEnemies() - e);
 									lvl.playSound(null, pos, TrialsModSounds.SPAWNER_SUMMON.get(), SoundSource.BLOCKS, 1.0F, 1.0F);
 									for (int i = 0; i != e; ++i) {
-										setUpMob(target, target.getSpawnType().create(lvl), lvl, target.getDifficulty(), target.findSpawnPositionNear(target.getSpawnType(), lvl, pos.above(), 2, world.getRandom()));
+										setUpMob(target, target.getSpawnType(), lvl, target.getDifficulty(), target.findSpawnPositionNear(target.getSpawnType(), lvl, pos.above(), 2, world.getRandom()), target.egg);
 									}
 								}
 							}
@@ -275,110 +284,117 @@ public class TrialSpawnerEntity extends BlockEntity {
 		lvl.setBlock(pos, state.setValue(TrialSpawnerBlock.ACTIVE, Boolean.valueOf(false)).setValue(TrialSpawnerBlock.CURSED, Boolean.valueOf(false)), 3);
 	}
 
-	public static void setUpMob(TrialSpawnerEntity spawner, Entity entity, ServerLevel lvl, int i, BlockPos pos) {
+	public static void setUpMob(TrialSpawnerEntity spawner, EntityType<?> type, ServerLevel lvl, int i, BlockPos pos, ItemStack egg) {
+		Entity entity = type.spawn(lvl, egg, null, pos, MobSpawnType.SPAWNER, false, false);
+
 		lvl.sendParticles(i >= 101 ? ParticleTypes.SOUL_FIRE_FLAME : ParticleTypes.FLAME, pos.getX(), (pos.getY() + 1.05), pos.getZ(), 12, 0.45, 0.25, 0.45, 0);
 		entity.moveTo(Vec3.atBottomCenterOf(pos));
+
 		if (entity instanceof Mob target) {
-			target.setCanPickUpLoot(false);
-			target.setPersistenceRequired();
+
 			spawner.addUUID(target.getUUID());
+			target.setPersistenceRequired();
 			target.getPersistentData().putBoolean("TrialSpawned", true);
+
+			target.setCanPickUpLoot(false);
 			target.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
 			target.setDropChance(EquipmentSlot.OFFHAND, 0.0F);
 			target.setDropChance(EquipmentSlot.HEAD, 0.0F);
 			target.setDropChance(EquipmentSlot.CHEST, 0.0F);
 			target.setDropChance(EquipmentSlot.LEGS, 0.0F);
 			target.setDropChance(EquipmentSlot.FEET, 0.0F);
-			if (target.getType().is(TrialsTags.ARMORABLE) && i > 65) {
-				if (LocalDate.now().get(ChronoField.DAY_OF_MONTH) == 31 && LocalDate.now().get(ChronoField.MONTH_OF_YEAR) == 10) {
-					target.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Math.random() <= 0.1 ? Blocks.JACK_O_LANTERN : Blocks.CARVED_PUMPKIN));
-				} else if (Math.random() >= 0.25) {
-					target.setItemSlot(EquipmentSlot.HEAD, new ItemStack(i >= 101 ? Items.DIAMOND_HELMET : Items.IRON_HELMET));
-				}
-				if (Math.random() >= 0.65) {
-					target.setItemSlot(EquipmentSlot.CHEST, new ItemStack(i >= 101 ? Items.DIAMOND_CHESTPLATE : Items.IRON_CHESTPLATE));
-				}
-				if (Math.random() >= 0.54) {
-					target.setItemSlot(EquipmentSlot.LEGS, new ItemStack(i >= 101 ? Items.DIAMOND_LEGGINGS : Items.IRON_LEGGINGS));
-				}
-				if (Math.random() >= 0.45) {
-					target.setItemSlot(EquipmentSlot.FEET, new ItemStack(i >= 101 ? Items.DIAMOND_BOOTS : Items.IRON_BOOTS));
-				}
-				Holder.Reference<TrimMaterial> m = getTrim(lvl);
-				for (ItemStack armor : target.getArmorSlots()) {
-					if (armor.is(ItemTags.TRIMMABLE_ARMOR)) {
-						ArmorTrim.setTrim(lvl.registryAccess(), armor, new ArmorTrim(m, TrimPatterns.getFromTemplate(lvl.registryAccess(), new ItemStack(i <= 1 ? TrialsItems.FLOW_TEMPLATE.get() : TrialsItems.BOLT_TEMPLATE.get())).get()));
+
+			if (!spawner.disableEffects) {
+				if (target.getType().is(TrialsTags.ARMORABLE) && i > 65) {
+					if (LocalDate.now().get(ChronoField.DAY_OF_MONTH) == 31 && LocalDate.now().get(ChronoField.MONTH_OF_YEAR) == 10) {
+						target.setItemSlot(EquipmentSlot.HEAD, new ItemStack(Math.random() <= 0.1 ? Blocks.JACK_O_LANTERN : Blocks.CARVED_PUMPKIN));
+					} else if (Math.random() >= 0.25) {
+						target.setItemSlot(EquipmentSlot.HEAD, new ItemStack(i >= 101 ? Items.DIAMOND_HELMET : Items.IRON_HELMET));
+					}
+					if (Math.random() >= 0.65) {
+						target.setItemSlot(EquipmentSlot.CHEST, new ItemStack(i >= 101 ? Items.DIAMOND_CHESTPLATE : Items.IRON_CHESTPLATE));
+					}
+					if (Math.random() >= 0.54) {
+						target.setItemSlot(EquipmentSlot.LEGS, new ItemStack(i >= 101 ? Items.DIAMOND_LEGGINGS : Items.IRON_LEGGINGS));
+					}
+					if (Math.random() >= 0.45) {
+						target.setItemSlot(EquipmentSlot.FEET, new ItemStack(i >= 101 ? Items.DIAMOND_BOOTS : Items.IRON_BOOTS));
+					}
+					Holder.Reference<TrimMaterial> m = getTrim(lvl);
+					for (ItemStack armor : target.getArmorSlots()) {
+						if (armor.is(ItemTags.TRIMMABLE_ARMOR)) {
+							ArmorTrim.setTrim(lvl.registryAccess(), armor, new ArmorTrim(m, TrimPatterns.getFromTemplate(lvl.registryAccess(), new ItemStack(i <= 1 ? TrialsItems.FLOW_TEMPLATE.get() : TrialsItems.BOLT_TEMPLATE.get())).get()));
+						}
 					}
 				}
-			}
-			if (target instanceof Zombie) {
-				if ((i > 76 || i < 21) && Math.random() >= 0.45) {
+				if (target instanceof Zombie) {
+					if ((i > 76 || i < 21) && Math.random() >= 0.45) {
+						target.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_SWORD));
+					}
+					if (i >= 101) {
+						if (target instanceof Drowned && Math.random() >= 0.45) {
+							target.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.TRIDENT));
+						} else if (Math.random() >= 0.65) {
+							target.addEffect(new MobEffectInstance(TrialsEffects.OOZE.get(), 12000, 0));
+						}
+					}
+				} else if (target instanceof AbstractSkeleton) {
+					target.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.BOW));
+					if (i >= 101) {
+						if (Math.random() >= 0.65) {
+							target.addEffect(new MobEffectInstance(TrialsEffects.INFESTED.get(), 12000, 0));
+						}
+					}
+				} else if (target instanceof Spider) {
+					if (i >= 101) {
+						if (Math.random() >= 0.65) {
+							target.addEffect(new MobEffectInstance(TrialsEffects.WEAVE.get(), 12000, 0));
+						}
+						target.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 12000, 0));
+						target.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 12000, 0));
+						target.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 12000, 0));
+						target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 12000, 0));
+					} else if (i > 90) {
+						target.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 12000, 0));
+					} else if (i > 75) {
+						target.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 12000, 0));
+					} else if (i < 10) {
+						target.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 12000, 0));
+					} else if (i < 25) {
+						target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 12000, 0));
+					}
+				} else if (target instanceof AbstractIllager) {
+					((GroundPathNavigation) target.getNavigation()).setCanOpenDoors(true);
+					if (i >= 101) {
+						if (Math.random() >= 0.65) {
+							target.addEffect(new MobEffectInstance(TrialsEffects.WINDED.get(), 12000, 0));
+						}
+						target.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 12000, 0));
+						target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 12000, 0));
+					} else if (i > 75) {
+						target.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 12000, 0));
+					} else if (i < 45) {
+						target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 12000, 0));
+					}
+					if (target instanceof Pillager) {
+						target.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.CROSSBOW));
+					} else if (target instanceof Vindicator) {
+						target.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_AXE));
+					}
+				} else if (target instanceof Vex) {
 					target.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_SWORD));
-				}
-				if (i >= 101) {
-					if (target instanceof Drowned && Math.random() >= 0.45) {
-						target.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.TRIDENT));
-					} else if (Math.random() >= 0.65) {
-						target.addEffect(new MobEffectInstance(TrialsEffects.OOZE.get(), 12000, 0));
+					target.setLeftHanded(false);
+				} else if (target instanceof Slime slym) {
+					if (i >= 101) {
+						slym.setSize(3, true);
+					} else {
+						slym.setSize(2, true);
 					}
-				}
-			} else if (target instanceof AbstractSkeleton) {
-				target.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.BOW));
-				if (i >= 101) {
-					if (Math.random() >= 0.65) {
-						target.addEffect(new MobEffectInstance(TrialsEffects.INFESTED.get(), 12000, 0));
-					}
-				}
-			} else if (target instanceof Spider) {
-				if (i >= 101) {
-					if (Math.random() >= 0.65) {
-						target.addEffect(new MobEffectInstance(TrialsEffects.WEAVE.get(), 12000, 0));
-					}
-					target.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 12000, 0));
-					target.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 12000, 0));
-					target.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 12000, 0));
-					target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 12000, 0));
-				} else if (i > 90) {
-					target.addEffect(new MobEffectInstance(MobEffects.INVISIBILITY, 12000, 0));
-				} else if (i > 75) {
-					target.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 12000, 0));
-				} else if (i < 10) {
-					target.addEffect(new MobEffectInstance(MobEffects.DAMAGE_BOOST, 12000, 0));
-				} else if (i < 25) {
-					target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 12000, 0));
-				}
-			} else if (target instanceof AbstractIllager) {
-				((GroundPathNavigation) target.getNavigation()).setCanOpenDoors(true);
-				if (i >= 101) {
-					if (Math.random() >= 0.65) {
-						target.addEffect(new MobEffectInstance(TrialsEffects.WINDED.get(), 12000, 0));
-					}
-					target.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 12000, 0));
-					target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 12000, 0));
-				} else if (i > 75) {
-					target.addEffect(new MobEffectInstance(MobEffects.REGENERATION, 12000, 0));
-				} else if (i < 45) {
-					target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 12000, 0));
-				}
-				if (target instanceof Pillager) {
-					target.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.CROSSBOW));
-				} else if (target instanceof Vindicator) {
-					target.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_AXE));
-				}
-			} else if (target instanceof Vex) {
-				target.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_SWORD));
-				target.setLeftHanded(false);
-			} else if (target instanceof Slime slym) {
-				if (i >= 101) {
-					slym.setSize(3, true);
 				} else {
-					slym.setSize(2, true);
+					target.finalizeSpawn(lvl, new DifficultyInstance(lvl.getDifficulty(), 5L, 5L, 1.0F), MobSpawnType.SPAWNER, null, null);
 				}
-			} else {
-				target.finalizeSpawn(lvl, new DifficultyInstance(lvl.getDifficulty(), 5L, 5L, 1.0F), MobSpawnType.SPAWNER, null, null);
 			}
 		}
-		lvl.addFreshEntity(entity);
 	}
 
 	public static Holder.Reference<TrimMaterial> getTrim(ServerLevel lvl) {
@@ -491,4 +507,4 @@ public class TrialSpawnerEntity extends BlockEntity {
 		this.getLevel().updateNeighborsAt(this.getBlockPos(), this.getBlockState().getBlock());
 		this.getLevel().sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), 3);
 	}
-}
+}
