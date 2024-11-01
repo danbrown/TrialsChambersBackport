@@ -1,21 +1,22 @@
-package net.salju.trialstowers.entity;
 
+package net.salju.trialstowers.entity;
+
+import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.salju.trialstowers.block.TuffLightBlock;
+import net.salju.trialstowers.block.WaxedBlockLight;
+import net.salju.trialstowers.block.WeatheringBlockLight;
 import net.salju.trialstowers.network.ApplyKnockback;
 import net.salju.trialstowers.init.TrialsModSounds;
 import net.salju.trialstowers.init.TrialsMobs;
 import net.salju.trialstowers.TrialsMod;
-import net.minecraft.world.phys.Vec3;
+
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.TrapDoorBlock;
-import net.minecraft.world.level.block.LeverBlock;
-import net.minecraft.world.level.block.DoorBlock;
-import net.minecraft.world.level.block.ButtonBlock;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.AbstractCandleBlock;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import net.minecraft.world.entity.LivingEntity;
@@ -123,6 +124,16 @@ public class WindCharge extends ThrowableProjectile {
 					lvl.setBlock(pos, state.cycle(DoorBlock.OPEN), 10);
 					lvl.playSound(null, pos, state.getValue(DoorBlock.OPEN) ? SoundEvents.WOODEN_DOOR_CLOSE : SoundEvents.WOODEN_DOOR_OPEN, SoundSource.BLOCKS, 1.0F, lvl.getRandom().nextFloat() * 0.1F + 0.9F);
 					lvl.gameEvent(null, state.getValue(DoorBlock.OPEN) ? GameEvent.BLOCK_CLOSE : GameEvent.BLOCK_OPEN, pos);
+				} else if (state.getBlock() instanceof CampfireBlock) {
+					lvl.setBlock(pos, state.setValue(CampfireBlock.LIT, false), 2);
+				} else if (state.getBlock() instanceof WeatheringBlockLight || state.getBlock() instanceof WaxedBlockLight || state.getBlock() instanceof TuffLightBlock) {
+					lvl.setBlock(pos, state.setValue(BlockStateProperties.LIT, !state.getValue(BlockStateProperties.LIT)), 2);
+				} else if (state.getBlock() instanceof DispenserBlock dispenserBlock) {
+					lvl.scheduleTick(pos, dispenserBlock, 4);
+					lvl.setBlock(pos, state.setValue(DispenserBlock.TRIGGERED, true), 4);
+				} else if (state.getBlock() instanceof DropperBlock dropperBlock) {
+					lvl.scheduleTick(pos, dropperBlock, 4);
+					lvl.setBlock(pos, state.setValue(DropperBlock.TRIGGERED, true), 4);
 				}
 			}
 			lvl.sendParticles(ParticleTypes.CLOUD, this.getX(), this.getY(), this.getZ(), 8, 1.5, 0.15, 1.5, 0);
