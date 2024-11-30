@@ -1,10 +1,14 @@
 package net.salju.trialstowers.block;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.phys.HitResult;
 import net.salju.trialstowers.init.TrialsProperties;
 import net.salju.trialstowers.init.TrialsModSounds;
-import net.salju.trialstowers.init.TrialsItems;
 import net.salju.trialstowers.init.TrialsBlockEntities;
-import net.minecraft.world.phys.BlockHitResult;
+
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.BlockState;
@@ -23,7 +27,8 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.core.BlockPos;
-import javax.annotation.Nullable;
+
+import javax.annotation.Nullable;
 
 public class TrialVaultBlock extends BaseEntityBlock {
 	public static final BooleanProperty ACTIVE = TrialsProperties.ACTIVE;
@@ -48,7 +53,7 @@ public class TrialVaultBlock extends BaseEntityBlock {
 		BlockEntity entity = world.getBlockEntity(pos);
 		ItemStack stack = player.getItemInHand(hand);
 		if (entity instanceof TrialVaultEntity target && isActive(state) && !isEjecting(state)) {
-			if (stack.is(this.isOminous ? TrialsItems.TRIAL_KEY_OMNI.get() : TrialsItems.TRIAL_KEY.get())) {
+			if (stack.is(target.getKey().getItem())) {
 				world.setBlock(pos, state.setValue(EJECT, Boolean.valueOf(true)), 3);
 				if (!player.isCreative()) {
 					stack.shrink(1);
@@ -57,6 +62,8 @@ public class TrialVaultBlock extends BaseEntityBlock {
 					lvl.playSound(null, pos, TrialsModSounds.VAULT_INSERT_KEY.get(), SoundSource.BLOCKS, 1.0F, 1.0F);
 				}
 				return InteractionResult.SUCCESS;
+			}else {
+				player.displayClientMessage(Component.translatable("block.trials.vault.key", target.getKey().getHoverName()), true);
 			}
 		}
 		return InteractionResult.PASS;
@@ -91,4 +98,27 @@ public class TrialVaultBlock extends BaseEntityBlock {
 	public boolean isEjecting(BlockState state) {
 		return state.getValue(EJECT);
 	}
-}
+
+	@Override
+	public ItemStack getCloneItemStack(BlockState state, HitResult hitResult, BlockGetter level, BlockPos pos, Player player) {
+		// include all the data from the block entity
+		BlockEntity entity = level.getBlockEntity(pos);
+		if (entity instanceof TrialVaultEntity target) {
+			ItemStack stack = super.getCloneItemStack(state, hitResult, level, pos, player);
+			stack.addTagElement("BlockEntityTag", target.getUpdateTag());
+			return stack;
+		}
+		return super.getCloneItemStack(state, hitResult, level, pos, player);
+	}
+
+	@Override
+	public void setPlacedBy(Level world, BlockPos pos, BlockState state, @Nullable LivingEntity livingEntity, ItemStack stack) {
+		super.setPlacedBy(world, pos, state, livingEntity, stack);
+		if (stack.hasTag() && stack.getTag().contains("BlockEntityTag")) {
+			BlockEntity entity = world.getBlockEntity(pos);
+			if (entity instanceof TrialVaultEntity spawnerEntity) {
+				spawnerEntity.load(stack.getTag().getCompound("BlockEntityTag"));
+			}
+		}
+	}
+}

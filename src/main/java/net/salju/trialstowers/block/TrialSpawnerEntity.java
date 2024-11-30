@@ -75,6 +75,7 @@ public class TrialSpawnerEntity extends BlockEntity {
 	private int e;
 	private int k;
 	private boolean disableEffects;
+	private int defaultCooldown = 36000;
 
 	public TrialSpawnerEntity(BlockPos pos, BlockState state) {
 		super(TrialsBlockEntities.SPAWNER.get(), pos, state);
@@ -95,6 +96,7 @@ public class TrialSpawnerEntity extends BlockEntity {
 		tag.putInt("Enemies", this.e);
 		tag.putInt("Killed", this.k);
 		tag.putBoolean("DisableEffects", this.disableEffects);
+		tag.putInt("DefaultCooldown", this.defaultCooldown);
 	}
 
 	@Override
@@ -112,6 +114,7 @@ public class TrialSpawnerEntity extends BlockEntity {
 		this.e = tag.getInt("Enemies");
 		this.k = tag.getInt("Killed");
 		this.disableEffects = tag.getBoolean("DisableEffects");
+		this.defaultCooldown = tag.getInt("DefaultCooldown");
 	}
 
 	@Override
@@ -134,6 +137,7 @@ public class TrialSpawnerEntity extends BlockEntity {
 			this.e = packet.getTag().getInt("Enemies");
 			this.k = packet.getTag().getInt("Killed");
 			this.disableEffects = packet.getTag().getBoolean("DisableEffects");
+			this.defaultCooldown = packet.getTag().getInt("DefaultCooldown");
 		}
 	}
 
@@ -152,7 +156,16 @@ public class TrialSpawnerEntity extends BlockEntity {
 		tag.putInt("Enemies", this.e);
 		tag.putInt("Killed", this.k);
 		tag.putBoolean("DisableEffects", this.disableEffects);
+		tag.putInt("DefaultCooldown", this.defaultCooldown);
 		return tag;
+	}
+
+	public int getDefaultCooldown() {
+		if (this.defaultCooldown != 0) {
+			return this.defaultCooldown;
+		} else {
+			return 36000;
+		}
 	}
 
 	public static void tick(Level world, BlockPos pos, BlockState state, TrialSpawnerEntity target) {
@@ -182,7 +195,7 @@ public class TrialSpawnerEntity extends BlockEntity {
 								target.setCd(target.getCd() - 1);
 							} else {
 								target.setActivity(false);
-								target.setCd(36000);
+								target.setCd(target.getDefaultCooldown());
 								lvl.playSound(null, pos, TrialsModSounds.SPAWNER_CLOSE.get(), SoundSource.BLOCKS, 1.0F, 1.0F);
 								world.setBlock(pos, state.setValue(TrialSpawnerBlock.ACTIVE, Boolean.valueOf(false)).setValue(TrialSpawnerBlock.EJECT, Boolean.valueOf(false)).setValue(TrialSpawnerBlock.CURSED, Boolean.valueOf(false)), 3);
 							}

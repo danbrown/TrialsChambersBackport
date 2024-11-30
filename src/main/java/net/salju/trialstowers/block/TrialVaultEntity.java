@@ -1,10 +1,12 @@
 package net.salju.trialstowers.block;
 
+import net.salju.trialstowers.init.TrialsItems;
 import net.salju.trialstowers.init.TrialsModSounds;
 import net.salju.trialstowers.init.TrialsBlockEntities;
 import net.salju.trialstowers.events.TrialsManager;
 import net.salju.trialstowers.TrialsMod;
-import net.minecraft.world.level.block.state.BlockState;
+
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.item.ItemStack;
@@ -22,6 +24,8 @@ public class TrialVaultEntity extends BlockEntity {
 	private String table;
 	private boolean isOminous;
 	private int cd;
+	private ItemStack keyItem;
+	private int defaultCooldown = 12000;
 
 	public TrialVaultEntity(BlockPos pos, BlockState state) {
 		super(TrialsBlockEntities.VAULT.get(), pos, state);
@@ -34,7 +38,11 @@ public class TrialVaultEntity extends BlockEntity {
 			tag.putString("LootTable", this.table);
 		}
 		tag.putInt("Cooldown", this.cd);
+		tag.putInt("DefaultCooldown", this.defaultCooldown);
 		tag.putBoolean("Ominous", this.isOminous);
+		if (this.keyItem != null) {
+			tag.put("KeyItem", this.keyItem.save(new CompoundTag()));
+		}
 	}
 
 	@Override
@@ -45,6 +53,10 @@ public class TrialVaultEntity extends BlockEntity {
 		}
 		this.cd = tag.getInt("Cooldown");
 		this.isOminous = tag.getBoolean("Ominous");
+		this.defaultCooldown = tag.getInt("DefaultCooldown");
+		if (tag.contains("KeyItem")) {
+			this.keyItem = ItemStack.of(tag.getCompound("KeyItem"));
+		}
 	}
 
 	@Override
@@ -60,6 +72,10 @@ public class TrialVaultEntity extends BlockEntity {
 			}
 			this.cd = packet.getTag().getInt("Cooldown");
 			this.isOminous = packet.getTag().getBoolean("Ominous");
+			this.defaultCooldown = packet.getTag().getInt("DefaultCooldown");
+			if (packet.getTag().contains("KeyItem")) {
+				this.keyItem = ItemStack.of(packet.getTag().getCompound("KeyItem"));
+			}
 		}
 	}
 
@@ -71,6 +87,10 @@ public class TrialVaultEntity extends BlockEntity {
 		}
 		tag.putInt("Cooldown", this.cd);
 		tag.putBoolean("Ominous", this.isOminous);
+		tag.putInt("DefaultCooldown", this.defaultCooldown);
+		if (this.keyItem != null) {
+			tag.put("KeyItem", this.keyItem.save(new CompoundTag()));
+		}
 		return tag;
 	}
 
@@ -84,7 +104,7 @@ public class TrialVaultEntity extends BlockEntity {
 						if (target.getCd() == 1) {
 							world.setBlock(pos, state.setValue(TrialVaultBlock.EJECT, Boolean.valueOf(false)).setValue(TrialVaultBlock.ACTIVE, Boolean.valueOf(false)), 3);
 							lvl.playSound(null, pos, TrialsModSounds.SPAWNER_CLOSE.get(), SoundSource.BLOCKS, 1.0F, 1.0F);
-							target.setCd(12000);
+							target.setCd(target.getDefaultCooldown());
 						} else if (target.getCd() == 0) {
 							int e = Mth.nextInt(world.getRandom(), 4, 7);
 							target.setCd(20 * e);
@@ -118,6 +138,14 @@ public class TrialVaultEntity extends BlockEntity {
 		return this.cd;
 	}
 
+	public int getDefaultCooldown() {
+		 if (this.defaultCooldown != 0) {
+			return this.defaultCooldown;
+		} else {
+			return 12000;
+		}
+	}
+
 	public boolean isOminous() {
 		return this.isOminous;
 	}
@@ -127,6 +155,13 @@ public class TrialVaultEntity extends BlockEntity {
 			return this.table;
 		}
 		return (this.isOminous() ? "trials:gameplay/vault_special_loot" : "trials:gameplay/vault_loot");
+	}
+
+	public ItemStack getKey() {
+		if (this.keyItem != null) {
+			return this.keyItem;
+		}
+		return new ItemStack((this.isOminous() ? TrialsItems.TRIAL_KEY_OMNI.get() : TrialsItems.TRIAL_KEY.get()));
 	}
 
 	public void setCd(int i) {
@@ -142,4 +177,4 @@ public class TrialVaultEntity extends BlockEntity {
 		this.getLevel().updateNeighborsAt(this.getBlockPos(), this.getBlockState().getBlock());
 		this.getLevel().sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), 3);
 	}
-}
+}

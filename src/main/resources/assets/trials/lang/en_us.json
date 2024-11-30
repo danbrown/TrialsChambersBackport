@@ -221,5 +221,6 @@
   "painting.trials.bouquet.author": "Kristoffer Zetterstrand",
   "subtitles.breeze_death": "*dies*",
   "entity.trials.wind_charge": "Wind Charge",
-  "painting.trials.changing.title": "Changing"
+  "painting.trials.changing.title": "Changing",
+  "block.trials.vault.key": "You need a %s to open this vault."
 }
